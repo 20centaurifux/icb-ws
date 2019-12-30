@@ -57,6 +57,65 @@ export function Client(username, password, nick, group)
 		_ws.send(JSON.stringify(json));
 	}
 
+	function format_wl(fields)
+	{
+		let flag = " ";
+		const nick = fields[2];
+		const total_seconds = parseInt(fields[3], 10);
+		const total_minutes = Math.round(total_seconds / 60);
+		const total_hours = Math.round(total_minutes / 60);
+		const minutes = total_minutes - (total_hours * 60);
+		const parts = [];
+
+		if(fields[1] !== " ")
+		{
+			flag = "*";
+		}
+
+		if(total_hours > 23)
+		{
+			const days = Math.round(total_hours / 24);
+
+			parts.push(days + "d");
+
+			const hours = total_hours - (days * 24);
+
+			if(hours > 0)
+			{
+				parts.push(hours + "h");
+			}
+
+			if(minutes > 0)
+			{
+				parts.push(minutes + "m");
+			}
+		}
+		else if(total_hours > 0)
+		{
+			parts.push(total_hours + "h");
+
+			if(minutes > 0)
+			{
+				parts.push(minutes + "m");
+			}
+		}
+		else if(total_minutes > 0)
+		{
+			parts.push(minutes + "m");
+		}
+		else
+		{
+			parts.push(total_seconds + "s");
+		}
+
+		const idle = parts.join();
+		const signon = new Date(parseInt(fields[5], 10) * 1000).toLocaleTimeString();
+		const loginid = fields[6] + "@" + fields[7];
+		const status = fields[8];
+
+		return " " + flag + " " + nick.padEnd(16) + " " + idle.padEnd(8) + " " + signon + " " + loginid + " " + status;
+	}
+
 	function handle_ltd_message(msg)
 	{
 		console.log(JSON.stringify(msg));
@@ -93,7 +152,7 @@ export function Client(username, password, nick, group)
 				}
 				else if(msg.fields[0] === "wl")
 				{
-					// TODO
+					messageReceived({type: "output", text: format_wl(msg.fields), timestamp: new Date()});
 				}
 				break;
 
