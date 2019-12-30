@@ -85,7 +85,7 @@ export const GUI = function()
 
 	function scrollToBottom()
 	{
-		const div = document.getElementById("msgout");
+		const div = document.getElementById("messages-container");
 
 		div.scrollTop = div.scrollHeight;
 	}
@@ -280,15 +280,11 @@ export const GUI = function()
 				cell.innerHTML = message.from;
 			}
 
-			const pre = document.createElement("pre");
-
-			pre.innerText = message.text;
-			pre.style.display = "inline";
 
 			cell = row.insertCell(2);
 
 			cell.className = "msg " + message.type;
-			cell.appendChild(pre);
+			cell.innerText = message.text;
 
 			if(autoScroll)
 			{
@@ -298,6 +294,38 @@ export const GUI = function()
 		clearMessages: function()
 		{
 			document.getElementById("messages").innerHTML = '<tbody></tbody>';
+		},
+		set users(users)
+		{
+			const ul = document.getElementById("userlist");
+
+			while(ul.firstChild)
+			{
+				ul.removeChild(ul.firstChild);
+			}
+
+			users.forEach(nick =>
+			{
+				const li = document.createElement("li");
+
+				li.classList.add("user");
+				li.innerText = nick;
+
+				ul.appendChild(li);
+			});
+		},
+		set userListEnabled(enabled)
+		{
+			const div = document.getElementById("users-container");
+
+			if(enabled)
+			{
+				div.classList.remove("disabled");
+			}
+			else
+			{
+				div.classList.add("disabled");
+			}
 		},
 		set onLogin(fn)
 		{

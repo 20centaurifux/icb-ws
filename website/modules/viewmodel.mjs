@@ -40,11 +40,13 @@ export function App()
 	let _title = "";
 	let _group = "";
 	let _nick = "";
+	let _users = [];
 	let _connectionState = ConnectionState.DISCONNECTED;
 	const _propertyChangeListeners = new Set();
 	const _channelListeners = new Set();
 	const _channels = new Map();
 	let _selectedChannel = "";
+	let _userListActive = true;
 
 	function Channel()
 	{
@@ -134,6 +136,10 @@ export function App()
 			firePropertyChanged("nick", _nick, nick);
 			_nick = nick;
 		},
+		get userListActive()
+		{
+			return _userListActive;
+		},
 		get selectedChannel()
 		{
 			return _selectedChannel;
@@ -151,6 +157,11 @@ export function App()
 
 			firePropertyChanged("selectedChannel", _selectedChannel, channelName);
 			_selectedChannel = channelName;
+
+			const old = _userListActive;
+
+			_userListActive = (_selectedChannel === "open");
+			firePropertyChanged("userListActive", old, _userListActive);
 		},
 		closeChannel: function(channelName)
 		{
@@ -184,6 +195,40 @@ export function App()
 			}
 
 			return messages;
+		},
+		addUser: function(nick)
+		{
+			if(!_users.includes(nick))
+			{
+				const old = _users.slice();
+
+				_users.push(nick);
+				_users.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
+				firePropertyChanged("users", old, _users);
+			}
+		},
+		removeUser: function(nick)
+		{
+			if(_users.includes(nick))
+			{
+				const old = _users.slice();
+
+				_users.remove(nick);
+
+				firePropertyChanged("users", old, _users);
+			}
+		},
+		clearUsers: function()
+		{
+			if(_users.length > 0)
+			{
+				const old = _users.slice();
+
+				_users.clear();
+
+				firePropertyChanged("users", old, _users);
+			}
 		},
 		addPropertyChangeListener: function(fn)
 		{

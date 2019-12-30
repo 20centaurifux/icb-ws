@@ -28,9 +28,9 @@
  ***************************************************************************/
 .body
 {
+	font-family:Courier, monospace;
 	padding:0;
 	margin:0;
-	font-family: Arial, Verdana, sans-serif;
 }
 
 div.page
@@ -99,10 +99,8 @@ div.hidden
 
 div.channels
 {
-	margin-top:4px;
 	width:100%;
-	border-top:1px solid #798d8f;
-	border-bottom:1px solid #798d8f;
+	border-bottom:1px solid #c2c2c2;
 }
 
 ul.channels
@@ -115,8 +113,7 @@ ul.channels
 li.channel
 {
 	float:left;
-	padding-left:4px;
-	padding-right:4px;
+	padding:4px;
 	border-right:1px solid #798d8f;
 	color:black;
 	background-color:white;
@@ -130,7 +127,7 @@ li.channel:hover
 
 li.channel.selected
 {
-	background-color:#1e2b37;
+	background-color:#149a80;
 	color:white;
 }
 
@@ -152,24 +149,29 @@ div.msgout
 	display:flex;
 	flex-grow:1;
 	overflow:auto;
+	overflow:hidden;
 }
 
 div.msgs
 {
 	flex-direction:column;
 	flex-grow:1;
+	overflow:auto;
 }
 
 table.msgs
 {
-	font-family: Courier, monospace;
 	padding:5px;
+	overflow:hidden;
 }
 
 td.msg
 {
 	vertical-align:top;
 	padding:2px;
+	line-height:1em;
+	font-size:12px;
+	white-space:pre;
 }
 
 td.msg.timestamp
@@ -179,7 +181,6 @@ td.msg.timestamp
 
 td.msg.from
 {
-	font-size:bold;
 	color:#2384c6;
 	text-align:right;
 }
@@ -221,6 +222,11 @@ div.users
 	overflow:auto;
 }
 
+div.users.disabled
+{
+	opacity:0.5;
+}
+
 ul.users
 {
 	list-style:none;
@@ -228,7 +234,9 @@ ul.users
 
 li.user
 {
-	padding-left:1.3em;
+	padding-left:0;
+	line-height:1.5em;
+	font-size:12px;
 }
 
 li.user:before
@@ -251,9 +259,11 @@ input.bottom.status { }
 
 input.bottom.input
 {
+	font-family:inherit;
 	flex-grow:1;
 	overflow:auto;
 	border:1px solid #3498DB;
+	line-height:1em;
 }
 
 a.reconnect
@@ -264,6 +274,6 @@ a.reconnect
 span.nick
 {
 	padding-left:2px;
-	padding-right:2px;
+	padding-right:5px;
 	font-size:small;
 }

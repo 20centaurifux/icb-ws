@@ -27,7 +27,7 @@
     OTHER DEALINGS IN THE SOFTWARE.
  ***************************************************************************/
 import { ConnectionState } from "./core.mjs";
-import { App, ChannelListener } from "./viewmodels.mjs";
+import { App, ChannelListener } from "./viewmodel.mjs";
 import { GUI } from "./gui.mjs";
 import { Client } from "./client.mjs";
 import { Config } from "./config.mjs";
@@ -105,6 +105,14 @@ function Chat(gui, username, password, nick, group)
 			{
 				_gui.nick = newValue;
 			}
+			else if(propertyName === "users")
+			{
+				_gui.users = newValue;
+			}
+			else if(propertyName === "userListActive")
+			{
+				_gui.userListEnabled = newValue;
+			}
 		});
 	}
 
@@ -167,20 +175,9 @@ function Chat(gui, username, password, nick, group)
 			}
 		};
 
-		_client.onUserAdded = (sender, nick) =>
-		{
-			// TODO
-		};
-
-		_client.onUserRemoved = (sender, nick) =>
-		{
-			// TODO
-		};
-
-		_client.onUsersRemoved = sender =>
-		{
-			// TODO
-		};
+		_client.onUserAdded = (sender, nick) => _vm.addUser(nick);
+		_client.onUserRemoved = (sender, nick) => _vm.removeUser(nick);
+		_client.onUsersRemoved = sender => _vm.clearUsers();
 	}
 
 	_gui.nick = nick;
