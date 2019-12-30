@@ -35,7 +35,7 @@ ChannelListener.prototype.removed = function(sender, channelName) {}
 ChannelListener.prototype.highlighted = function(sender, channelName, highlighted) {}
 ChannelListener.prototype.received = function(sender, channelName, message) {}
 
-export function ViewModel()
+export function App()
 {
 	let _title = "";
 	let _group = "";

@@ -27,12 +27,12 @@
     OTHER DEALINGS IN THE SOFTWARE.
  ***************************************************************************/
 import { ConnectionState } from "./core.mjs";
-import { ViewModel, ChannelListener } from "./viewmodel.mjs";
+import { App, ChannelListener } from "./viewmodels.mjs";
 import { GUI } from "./gui.mjs";
 import { Client } from "./client.mjs";
 import { Config } from "./config.mjs";
 
-function Listener(vm, gui)
+function Channels(vm, gui)
 {
 	ChannelListener.call(this);
 
@@ -40,24 +40,24 @@ function Listener(vm, gui)
 	this.gui = gui;
 }
 
-Listener.prototype = Object.create(ChannelListener.prototype);
+Channels.prototype = Object.create(ChannelListener.prototype);
 
-Listener.prototype.added = function(sender, channelName)
+Channels.prototype.added = function(sender, channelName)
 {
 	this.gui.addChannel(channelName);
 }
 
-Listener.prototype.removed = function(sender, channelName)
+Channels.prototype.removed = function(sender, channelName)
 {
 	this.gui.removeChannel(channelName);
 }
 
-Listener.prototype.highlighted = function(sender, channelName, highlighted)
+Channels.prototype.highlighted = function(sender, channelName, highlighted)
 {
 	this.gui.highlightChannel(channelName, highlighted);
 }
 
-Listener.prototype.received = function(sender, channelName, message)
+Channels.prototype.received = function(sender, channelName, message)
 {
 	if(this.vm.selectedChannel === channelName)
 	{
@@ -65,10 +65,10 @@ Listener.prototype.received = function(sender, channelName, message)
 	}
 }
 
-function App(username, password, nick, group)
+function Chat(gui, username, password, nick, group)
 {
-	const _vm = new ViewModel();
-	const _gui = GUI();
+	const _vm = new App();
+	const _gui = gui;
 	const _client = new Client(username, password, nick, group);
 
 	function bindProperties()
@@ -110,7 +110,7 @@ function App(username, password, nick, group)
 
 	function bindChannels()
 	{
-		_vm.addChannelListener(new Listener(_vm, _gui));
+		_vm.addChannelListener(new Channels(_vm, _gui));
 	}
 
 	function bindGUIEvents()
@@ -201,7 +201,37 @@ function App(username, password, nick, group)
 	});
 }
 
-const app = new App(Config.loginid, null, "test", "1");
+function Login()
+{
+	const _gui = GUI();
 
-app.init();
-app.start();
+	function bindGUIEvents()
+	{
+		_gui.onLogin = sender =>
+		{
+			const credentials = _gui.credentials();
+
+			if(credentials.nick && credentials.group)
+			{
+				_gui.hideLogin();
+
+				const chat = new Chat(_gui, Config.loginid, null, credentials.nick, credentials.group);
+
+				chat.init();
+				chat.start();
+			}
+		};
+	}
+
+	return Object.freeze(
+	{
+		init: function()
+		{
+			bindGUIEvents();
+		}
+	});
+}
+
+const login = new Login();
+
+login.init();

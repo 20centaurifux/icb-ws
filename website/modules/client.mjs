@@ -59,6 +59,7 @@ export function Client(username, password, nick, group)
 
 	function handle_ltd_message(msg)
 	{
+		console.log(JSON.stringify(msg));
 		switch(msg.type)
 		{
 			case "j":
@@ -74,7 +75,7 @@ export function Client(username, password, nick, group)
 				break;
 
 			case "i":
-				if(msg.fields[0] == "co")
+				if(msg.fields[0] === "co")
 				{
 					const regexp = /<\*to: ([^\s\.]+)\*>/g;
 					const m = regexp.exec(msg.fields[1]);
@@ -89,6 +90,10 @@ export function Client(username, password, nick, group)
 					{
 						messageReceived({type: "output", text: msg.fields[1], timestamp: new Date()});
 					}
+				}
+				else if(msg.fields[0] === "wl")
+				{
+					// TODO
 				}
 				break;
 

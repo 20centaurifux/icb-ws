@@ -30,6 +30,7 @@ import { ConnectionState } from "./core.mjs";
 
 export const GUI = function()
 {
+	let _onLogin = function(sender) {}
 	let _connectionState = ConnectionState.DISCONNECTED;
 	let _onSelectChannel = function(sender, channelName) {}
 	let _onCloseChannel = function(sender, channelName) {}
@@ -57,18 +58,21 @@ export const GUI = function()
 	function updateConnectionStatus(connected)
 	{
 		const icon = document.getElementById("connection-status");
+		const reconnectButton = document.getElementById("reconnect");
 
 		if(connected)
 		{
 			icon.classList.remove("fa-unlink");
 			icon.classList.add("fa-link");
 			icon.title = "Connected to ICB \\o/";
+			reconnectButton.style.display = "none";
 		}
 		else
 		{
 			icon.classList.remove("fa-link");
 			icon.classList.add("fa-unlink");
 			icon.title = "Disconnected from ICB :(";
+			reconnectButton.style.display = "block";
 		}
 	}
 
@@ -86,6 +90,13 @@ export const GUI = function()
 		div.scrollTop = div.scrollHeight;
 	}
 
+	const button = document.getElementById("login-button");
+
+	button.addEventListener("click", event =>
+	{
+		_onLogin(this);
+	});
+
 	const input = document.getElementById("message-input");
 
 	input.addEventListener("keyup", event =>
@@ -97,9 +108,12 @@ export const GUI = function()
 		}
 	});
 
-
 	return Object.freeze(
 	{
+		hideLogin: function()
+		{
+			document.getElementsByClassName("screen-login")[0].classList.add("hidden");
+		},
 		set connectionState(state)
 		{
 			showConnectingScreen(state === ConnectionState.CONNECTING);
@@ -210,6 +224,11 @@ export const GUI = function()
 				}
 			}
 		},
+		credentials: function()
+		{
+			return { "nick": document.getElementsByName("nickname")[0].value,
+			         "group": document.getElementsByName("group")[0].value };
+		},
 		set title(title)
 		{
 			const div = document.getElementsByClassName("header")[0];
@@ -279,6 +298,10 @@ export const GUI = function()
 		clearMessages: function()
 		{
 			document.getElementById("messages").innerHTML = '<tbody></tbody>';
+		},
+		set onLogin(fn)
+		{
+			_onLogin = fn;
 		},
 		set onSelectChannel(fn)
 		{

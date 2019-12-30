@@ -32,6 +32,29 @@
 </head>
 
 <body class="body">
+	<div class="screen-login">
+		<div class="login">
+			<form>
+				<table>
+					<tr>
+						<td><label for="nickname"><b>Username</b></label></td>
+						<td><input type="text" placeholder="Enter Nickname" name="nickname" maxlength="16" required></td>
+					</tr>
+
+					<tr>
+						<td><label for="group"><b>Group</b></label></td>
+						<td><input type="text" placeholder="Enter Group" name="group" value="1" maxlength="16" required></td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td><button id="login-button" type="button">Join Internet CB Network</button></td>
+					</tr>
+				</table>
+			</form>
+		</div>
+	</div>
+
 	<div class="screen-connecting hidden">
 		<div style="text-align:center;">
 			<i class="fa fa-spinner fa-spin" style="font-size:48px; display:inline-block;"></i>
@@ -70,6 +93,7 @@
 			<input id="message-input" type="text" class="bottom input" maxlength="200" />
 
 			<div class="bottom status">
+				<a href="/" id="reconnect" class="reconnect">Disconnected, click here to login again.</a>
 				<i id="connection-status" class="fa fa-unlink"></i>
 			</div>
 		</div>
