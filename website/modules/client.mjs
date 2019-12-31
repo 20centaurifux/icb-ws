@@ -118,7 +118,6 @@ export function Client(username, password, nick, group)
 
 	function handle_ltd_message(msg)
 	{
-		console.log(JSON.stringify(msg));
 		switch(msg.type)
 		{
 			case "j":
@@ -126,7 +125,7 @@ export function Client(username, password, nick, group)
 				break;
 
 			case "d":
-				messageReceived({type: "status", category: msg.fields[0], text: msg.fields[1], timestamp: new Date()});
+				messageReceived({type: "status", from: msg.fields[0], text: msg.fields[1], timestamp: new Date()});
 				break;
 
 			case "e":
@@ -212,6 +211,8 @@ export function Client(username, password, nick, group)
 
 					_ws.onmessage = e =>
 					{
+						console.log(e.data);
+
 						try
 						{
 							const msg = eval('(' + e.data + ')');

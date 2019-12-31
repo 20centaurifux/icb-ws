@@ -214,7 +214,7 @@ export function App()
 			{
 				const old = _users.slice();
 
-				_users.remove(nick);
+				_users.splice(_users.indexOf(nick), 1);
 
 				firePropertyChanged("users", old, _users);
 			}

@@ -261,6 +261,7 @@ class Client:
                     self.__model.add_member(parts[0])
             elif fields[0] == "Sign-off" or fields[0] == "Depart":
                 if fields[1].startswith("Your moderator"):
+                    self.__model.remove_member(self.__model.moderator)
                     self.__model.moderator = None
                 else:
                     parts = fields[1].split(" ")

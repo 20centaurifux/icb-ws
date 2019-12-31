@@ -121,7 +121,7 @@ class WSProtocol(WebSocketServerProtocol, client.ModelListener):
         self.__send_message__({"kind": "users", "action": "add", "nick": nick})
 
     def member_removed(self, nick):
-        self.__send_message__({"kind": "users", "action": "renive", "nick": nick})
+        self.__send_message__({"kind": "users", "action": "remove", "nick": nick})
 
 if __name__ == "__main__":
     factory = WebSocketServerFactory(u"ws://127.0.0.1:9000")

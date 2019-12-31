@@ -1,1 +1,1 @@
-Experimental HTML5 frontend for ICB.
+Experimental HTML5 front-end for ICB.
