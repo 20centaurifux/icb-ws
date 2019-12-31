@@ -28,8 +28,9 @@
  ***************************************************************************/
 html, body
 {
+	font-family:Arial, Helvetica, sans-serif;
 	height:100%;
-	font-family:Courier, monospace;
+	background-color:white;
 	padding:0;
 	margin:0;
 }
@@ -76,7 +77,6 @@ div.header
 	overflow:hidden;
 	background-color:#2C3E50;
 	background-image: linear-gradient(to bottom, #2C3E50, #1a252f);
-	box-shadow: 1px 2px 2px grey;
 	color:white;
 	height:50px;
 	padding-left:7px;
@@ -114,6 +114,7 @@ ul.channels
 
 li.channel
 {
+	font-family:verdana;
 	display:table-cell;
 	height:2em;
 	line-height:2em;
@@ -158,6 +159,7 @@ div.msgout
 
 div.msgs
 {
+	font-family:Courier, monospace;
 	flex-direction:column;
 	flex-grow:1;
 	overflow:auto;
@@ -264,7 +266,7 @@ input.bottom.status { }
 
 input.bottom.input
 {
-	font-family:inherit;
+	font-family:Courier, monospace;
 	flex-grow:1;
 	overflow:auto;
 	border:1px solid #3498DB;
