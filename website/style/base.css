@@ -34,13 +34,6 @@ html, body
 	margin:0;
 }
 
-.body
-{
-	font-family:Courier, monospace;
-	padding:0;
-	margin:0;
-}
-
 div.page
 {
 	display:flex;
@@ -182,7 +175,7 @@ td.msg
 	padding:2px;
 	line-height:1em;
 	font-size:12px;
-	white-space:pre;
+	white-space:pre-wrap;
 }
 
 td.msg.timestamp
@@ -288,4 +281,22 @@ span.nick
 	padding-left:2px;
 	padding-right:5px;
 	font-size:small;
+}
+
+@media only screen and (max-device-width:800px)
+{
+	div.users
+	{
+		display:none;
+	}
+
+	td.msg.timestamp
+	{
+		display:none;
+	}
+
+	div.msgs
+	{
+		overflow:auto;
+	}
 }
