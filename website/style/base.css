@@ -26,6 +26,14 @@
     ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
     OTHER DEALINGS IN THE SOFTWARE.
  ***************************************************************************/
+html, body
+{
+	height:100%;
+	font-family:Courier, monospace;
+	padding:0;
+	margin:0;
+}
+
 .body
 {
 	font-family:Courier, monospace;
@@ -38,19 +46,6 @@ div.page
 	display:flex;
 	flex-flow:column;
 	height:100%;
-}
-
-div.header
-{
-	display:flex;
-	align-items:center;
-	overflow:hidden;
-	background-color:#2C3E50;
-	background-image: linear-gradient(to bottom, #2C3E50, #1a252f);
-	box-shadow: 1px 2px 2px grey;
-	color:white;
-	height:50px;
-	padding-left:7px;
 }
 
 div.screen-login
@@ -69,6 +64,7 @@ div.screen-login
 	background-repeat:repeat;
 }
 
+
 div.login
 {
 	display:flex;
@@ -79,11 +75,25 @@ div.login
 	height:100%;
 }
 
+div.header
+{
+	display:flex;
+	flex-shrink:0;
+	align-items:center;
+	overflow:hidden;
+	background-color:#2C3E50;
+	background-image: linear-gradient(to bottom, #2C3E50, #1a252f);
+	box-shadow: 1px 2px 2px grey;
+	color:white;
+	height:50px;
+	padding-left:7px;
+}
+
 div.screen-connecting
 {
 	display:flex;
 	align-items:center;
-	justify-content: center;
+	justify-content:center;
 	position:fixed;
 	width:100%;
 	height:100%;
@@ -106,17 +116,19 @@ div.channels
 ul.channels
 {
 	list-style-type:none;
-	margin:0;
-	padding:0;
+	display:table-row;
 }
 
 li.channel
 {
-	float:left;
-	padding:4px;
+	display:table-cell;
+	height:2em;
+	line-height:2em;
+	vertical-align:middle;
+	padding:5px;
 	border-right:1px solid #798d8f;
-	color:black;
 	background-color:white;
+	color:black;
 }
 
 li.channel:hover
@@ -149,7 +161,6 @@ div.msgout
 	display:flex;
 	flex-grow:1;
 	overflow:auto;
-	overflow:hidden;
 }
 
 div.msgs
@@ -212,7 +223,7 @@ td.msg.error
 
 td.msg.output
 {
-	color:#c87f0a;
+	color:#393939
 }
 
 div.users
@@ -251,6 +262,7 @@ li.user:before
 div.bottom
 {
 	display:flex;
+	flex-shrink:0;
 	align-items:center;
 	margin:1px;
 }

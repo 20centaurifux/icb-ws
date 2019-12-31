@@ -125,7 +125,7 @@ export function Client(username, password, nick, group)
 				break;
 
 			case "d":
-				messageReceived({type: "status", from: msg.fields[0], text: msg.fields[1], timestamp: new Date()});
+				messageReceived({type: "status", category: msg.fields[0], text: msg.fields[1], timestamp: new Date()});
 				break;
 
 			case "e":

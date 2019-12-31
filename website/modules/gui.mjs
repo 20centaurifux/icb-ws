@@ -275,11 +275,18 @@ export const GUI = function()
 			cell = row.insertCell(1);
 			cell.className = "msg from " + message.type;
 
-			if(message.from)
+			if(message.category)
+			{
+				cell.innerHTML = message.category;
+			}
+			else if(message.from)
 			{
 				cell.innerHTML = message.from;
 			}
-
+			else if(message.sender)
+			{
+				cell.innerHTML = message.sender;
+			}
 
 			cell = row.insertCell(2);
 
