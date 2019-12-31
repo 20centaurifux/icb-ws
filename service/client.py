@@ -77,6 +77,7 @@ class Model:
         self.__topic = None
         self.__members = set()
         self.__listeners = set()
+        self.__build_userlist = False
 
     @property
     def nick(self):
@@ -275,15 +276,20 @@ class Client:
                     self.__model.moderator = parts[0]
             elif fields[0] == "Register" and fields[1].startswith("Nick registered"):
                 self.__model.registered = True
-        elif t == "i" and len(fields) >= 3:
-            if fields[0] == "co" and fields[2] == "1":
+        elif t == "i" and len(fields) >= 2:
+            if fields[0] == "co":
                 m = re.match("Group: ([^\s\.]+)\s+\((\w{3})\) Mod: ([^\s\.]+)\s+Topic: (.*)", fields[1])
 
                 if m:
-                    self.__model.group_status = m.group(2)
-                    self.__model.moderator = m.group(3) if m.group(3) != "(None)" else None
-                    self.__model.topic = m.group(4) if m.group(4) != "(None)" else None
-            elif fields[0] == "wl":
+                    if len(fields) >= 3 and fields[2] == "1":
+                        self.__build_userlist = True
+
+                        self.__model.group_status = m.group(2)
+                        self.__model.moderator = m.group(3) if m.group(3) != "(None)" else None
+                        self.__model.topic = m.group(4) if m.group(4) != "(None)" else None
+                    else:
+                        self.__build_userlist = False
+            elif fields[0] == "wl" and self.__build_userlist:
                 self.__model.add_member(fields[2])
         elif t == "g":
             self.quit()
