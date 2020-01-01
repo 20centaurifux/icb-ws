@@ -27,50 +27,56 @@ import sys
 import getopt
 import asyncio
 import json
+import log
 import client
 import ltd
 
 from autobahn.asyncio.websocket import WebSocketServerProtocol, WebSocketServerFactory
 
 class WSProtocol(WebSocketServerProtocol, client.StateListener):
-    def __init__(self, address, port):
+    def __init__(self, logger, address, port):
         WebSocketServerProtocol.__init__(self)
         client.StateListener.__init__(self)
 
+        self.__log = logger
         self.__address = address
         self.__port = port
+        self.__peer = None
 
     def onConnect(self, request):
-        print("Client connecting: {0}".format(request.peer))
+        self.__log.info("Client connecting: %s", request.peer)
 
+        self.__peer = request.peer
         self.__client = None
 
     def onOpen(self):
-        print("WebSocket connection open.")
+        self.__log.info("Client connected successfully: %s", self.__peer)
 
     def onMessage(self, payload, isBinary):
-        if isBinary:
-            return
+        if not isBinary:
+            try:
+                msg = self.__read_message__(payload)
 
-        try:
-            msg = self.__read_message__(payload)
+                if msg["type"] == "a" and not self.__client:
+                    loginid, nick, group = msg["fields"][:3]
+                    password = msg["fields"][4] if len(msg["fields"]) >= 5 else ""
 
-            if msg["type"] == "a" and not self.__client:
-                loginid, nick, group = msg["fields"][:3]
-                password = msg["fields"][4] if len(msg["fields"]) >= 5 else ""
+                    asyncio.create_task(self.__run_icb_client__(loginid, nick, group, password))
+                else:
+                    e = ltd.Encoder(msg["type"])
 
-                asyncio.create_task(self.__run_icb_client__(loginid, nick, group, password))
-            else:
-                e = ltd.Encoder(msg["type"])
+                    for f in msg["fields"]:
+                        e.add_field_str(f)
 
-                for f in msg["fields"]:
-                    e.add_field_str(f)
-
-                self.__client.send(e.encode())
-        except Exception as e:
-            print(e)
+                    self.__client.send(e.encode())
+            except Exception as e:
+                self.__log.warning(e)
+        else:
+            self.__log.debug("Discarding binary message from %s.", self.__peer)
 
     async def __run_icb_client__(self, loginid, nick, group, password):
+        self.__log.debug("Connecting to %s:%d.", self.__address, self.__port)
+
         self.__client = client.Client(self.__address, self.__port)
 
         self.__client.state.add_listener(self)
@@ -98,10 +104,12 @@ class WSProtocol(WebSocketServerProtocol, client.StateListener):
                 elif task is connection_lost_f:
                     running = False
 
+        self.__log.debug("Disconnected from %s:%d.", self.__address, self.__port)
+
         self.sendClose()
 
     def onClose(self, wasClean, code, reason):
-        print("WebSocket connection closed: {0}".format(reason))
+        self.__log.info("Connection closed: %s", reason)
 
         if self.__client:
             self.__client.quit()
@@ -127,8 +135,13 @@ class WSProtocol(WebSocketServerProtocol, client.StateListener):
         self.__send_message__({"kind": "users", "action": "remove", "nick": nick})
 
 def run(m):
+    logger = log.new_logger()
+
+    logger.info("Starting websocket server: %s", m["url"])
+    logger.info("Listen on: %s:%d", m["address"], m["port"])
+
     factory = WebSocketServerFactory(m["url"])
-    factory.protocol = lambda: WSProtocol(m["remote-address"], m["remote-port"])
+    factory.protocol = lambda: WSProtocol(logger, m["remote-address"], m["remote-port"])
 
     loop = asyncio.get_event_loop()
 
