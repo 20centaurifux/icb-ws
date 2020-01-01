@@ -23,19 +23,22 @@
     ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
     OTHER DEALINGS IN THE SOFTWARE.
 """
+import sys
+import getopt
 import asyncio
-import traceback
-import random
-import client
 import json
+import client
 import ltd
 
 from autobahn.asyncio.websocket import WebSocketServerProtocol, WebSocketServerFactory
 
-class WSProtocol(WebSocketServerProtocol, client.ModelListener):
-    def __init__(self):
+class WSProtocol(WebSocketServerProtocol, client.StateListener):
+    def __init__(self, address, port):
         WebSocketServerProtocol.__init__(self)
-        client.ModelListener.__init__(self)
+        client.StateListener.__init__(self)
+
+        self.__address = address
+        self.__port = port
 
     def onConnect(self, request):
         print("Client connecting: {0}".format(request.peer))
@@ -68,9 +71,9 @@ class WSProtocol(WebSocketServerProtocol, client.ModelListener):
             print(e)
 
     async def __run_icb_client__(self, loginid, nick, group, password):
-        self.__client = client.Client("127.0.0.1", 7326)
+        self.__client = client.Client(self.__address, self.__port)
 
-        self.__client.model.add_listener(self)
+        self.__client.state.add_listener(self)
 
         connection_lost_f = await self.__client.connect()
 
@@ -123,12 +126,57 @@ class WSProtocol(WebSocketServerProtocol, client.ModelListener):
     def member_removed(self, nick):
         self.__send_message__({"kind": "users", "action": "remove", "nick": nick})
 
-if __name__ == "__main__":
-    factory = WebSocketServerFactory(u"ws://127.0.0.1:9000")
-    factory.protocol = WSProtocol
+def run(m):
+    factory = WebSocketServerFactory(m["url"])
+    factory.protocol = lambda: WSProtocol(m["remote-address"], m["remote-port"])
 
     loop = asyncio.get_event_loop()
-    coro = loop.create_server(factory, '0.0.0.0', 9000)
-    server = loop.run_until_complete(coro)
+
+    server = loop.create_server(factory, m["address"], m["port"])
+
+    loop.run_until_complete(server)
 
     loop.run_forever()
+
+def print_usage():
+    print("%s [options]" % sys.argv[0])
+    print("  -U, --url              websocket url")
+    print("  -L, --address          listen address")
+    print("  -P, --port             listen port")
+    print("  -s, --remote-address   ICB server address")
+    print("  -p, --remote-port      ICB server port")
+    print("  -h, --help             display this help and exit")
+
+def get_opts(argv):
+    options, _ = getopt.getopt(argv, "hU:L:P:s:p:", ["help", "url=", "address=", "port=", "remote-address=", "remote-port="])
+
+    m = {"url": "ws://localhost:7329",
+         "address": "127.0.0.1",
+         "port": 7329,
+         "remote-address": "localhost",
+         "remote-port": 7326,
+         "action": "run"}
+
+    for opt, arg in options:
+        if opt in ("-h", "--help"):
+            m["action"] = "help"
+        elif opt in ("-U", "--url"):
+            m["url"] = arg
+        elif opt in ("-L", "--address"):
+            m["address"] = arg
+        elif opt in ("-P", "--port"):
+            m["port"] = int(arg)
+        if opt in ("-s", "--remote-address"):
+            m["remote-address"] = arg
+        elif opt in ("-p", "--remote-port"):
+            m["remote-port"] = int(arg)
+
+    return m
+
+if __name__ == "__main__":
+    m = get_opts(sys.argv[1:])
+
+    if m["action"] == "run":
+        run(m)
+    else:
+        print_usage()

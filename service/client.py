@@ -54,7 +54,7 @@ class ICBClientProtocol(asyncio.Protocol):
     def __message_received__(self, type_id, payload):
         self.__queue.put_nowait((type_id, payload))
 
-class ModelListener:
+class StateListener:
     def changed(self, name, old, new):
         pass
 
@@ -67,7 +67,7 @@ class ModelListener:
     def member_removed(self, nick):
         pass
 
-class Model:
+class State:
     def __init__(self):
         self.__nick = None
         self.__registered = False
@@ -85,7 +85,7 @@ class Model:
 
     @nick.setter
     def nick(self, value):
-        self.__change__("_Model__nick", value)
+        self.__change__("_State__nick", value)
 
     @property
     def registered(self):
@@ -93,7 +93,7 @@ class Model:
 
     @registered.setter
     def registered(self, value):
-        self.__change__("_Model__registered", value)
+        self.__change__("_State__registered", value)
 
     @property
     def group(self):
@@ -101,7 +101,7 @@ class Model:
 
     @group.setter
     def group(self, value):
-        self.__change__("_Model__group", value)
+        self.__change__("_State__group", value)
 
     @property
     def group_status(self):
@@ -109,7 +109,7 @@ class Model:
 
     @group_status.setter
     def group_status(self, value):
-        self.__change__("_Model__group_status", value)
+        self.__change__("_State__group_status", value)
 
     @property
     def moderator(self):
@@ -117,7 +117,7 @@ class Model:
 
     @moderator.setter
     def moderator(self, value):
-        self.__change__("_Model__moderator", value)
+        self.__change__("_State__moderator", value)
 
     @property
     def topic(self):
@@ -125,7 +125,7 @@ class Model:
 
     @topic.setter
     def topic(self, value):
-        self.__change__("_Model__topic", value)
+        self.__change__("_State__topic", value)
 
     def __change__(self, attr, v):
         old = getattr(self, attr)
@@ -169,11 +169,11 @@ class Client:
         self.__port = port
         self.messageq = asyncio.Queue()
         self.__transport = None
-        self.__model = Model()
+        self.__state = State()
 
     @property
-    def model(self):
-        return self.__model
+    def state(self):
+        return self.__state
 
     async def connect(self):
         loop = asyncio.get_event_loop()
@@ -237,8 +237,8 @@ class Client:
                 m = re.match("You are now in group ([^\s\.]+)", fields[1])
 
                 if m:
-                    self.__model.group = m.group(1)
-                    self.__model.remove_all_members()
+                    self.__state.group = m.group(1)
+                    self.__state.remove_all_members()
 
                     self.command("w", ".", "1")
             elif fields[0] == "Name":
@@ -247,38 +247,38 @@ class Client:
                 if m:
                     old, new = m.group(1), m.group(2)
 
-                    self.__model.remove_member(old)
-                    self.__model.add_member(new)
+                    self.__state.remove_member(old)
+                    self.__state.add_member(new)
 
                     if new == self.__nick:
-                        self.__model.nick = m.group(2)
-                        self.__model.registered = False
+                        self.__state.nick = m.group(2)
+                        self.__state.registered = False
             elif fields[0] == "Topic":
                 m = re.match(".* changed the topic to \"(.+)\"", fields[1])
 
                 if m:
-                    self.__model.topic = m.group(1)
+                    self.__state.topic = m.group(1)
             elif fields[0] == "Sign-on" or fields[0] == "Arrive":
                 parts = fields[1].split(" ")
 
                 if(parts):
-                    self.__model.add_member(parts[0])
+                    self.__state.add_member(parts[0])
             elif fields[0] == "Sign-off" or fields[0] == "Depart":
                 if fields[1].startswith("Your moderator"):
-                    self.__model.remove_member(self.__model.moderator)
-                    self.__model.moderator = None
+                    self.__state.remove_member(self.__state.moderator)
+                    self.__state.moderator = None
                 else:
                     parts = fields[1].split(" ")
 
                     if parts:
-                        self.__model.remove_member(parts[0])
+                        self.__state.remove_member(parts[0])
             elif fields[0] == "Pass":
                 parts = fields[1].split(" ")
 
                 if(parts):
-                    self.__model.moderator = parts[0]
+                    self.__state.moderator = parts[0]
             elif fields[0] == "Register" and fields[1].startswith("Nick registered"):
-                self.__model.registered = True
+                self.__state.registered = True
         elif t == "i" and len(fields) >= 2:
             if fields[0] == "co":
                 m = re.match("Group: ([^\s\.]+)\s+\((\w{3})\) Mod: ([^\s\.]+)\s+Topic: (.*)", fields[1])
@@ -287,12 +287,12 @@ class Client:
                     if len(fields) >= 3 and fields[2] == "1":
                         self.__build_userlist = True
 
-                        self.__model.group_status = m.group(2)
-                        self.__model.moderator = m.group(3) if m.group(3) != "(None)" else None
-                        self.__model.topic = m.group(4) if m.group(4) != "(None)" else None
+                        self.__state.group_status = m.group(2)
+                        self.__state.moderator = m.group(3) if m.group(3) != "(None)" else None
+                        self.__state.topic = m.group(4) if m.group(4) != "(None)" else None
                     else:
                         self.__build_userlist = False
             elif fields[0] == "wl" and self.__build_userlist:
-                self.__model.add_member(fields[2])
+                self.__state.add_member(fields[2])
         elif t == "g":
             self.quit()
