@@ -167,7 +167,7 @@ class Client:
     def __init__(self, host, port):
         self.__host = host
         self.__port = port
-        self.messageq = asyncio.Queue()
+        self.__queue = asyncio.Queue()
         self.__transport = None
         self.__state = State()
 
@@ -180,7 +180,7 @@ class Client:
 
         on_conn_lost = loop.create_future()
 
-        self.__transport, _ = await loop.create_connection(lambda: ICBClientProtocol(on_conn_lost, self.messageq),
+        self.__transport, _ = await loop.create_connection(lambda: ICBClientProtocol(on_conn_lost, self.__queue),
                                                            self.__host,
                                                            self.__port)
 
@@ -199,8 +199,8 @@ class Client:
 
         self.__nick = nick
 
-    def open_message(self, text):
-        self.__transport.write(ltd.encode_str("b", text.strip()))
+    def send(self, msg):
+        self.__transport.write(msg)
 
     def command(self, command, arg, msgid):
         e = ltd.Encoder("h")
@@ -211,9 +211,6 @@ class Client:
 
         self.__transport.write(e.encode())
 
-    def send(self, msg):
-        self.__transport.write(msg)
-
     def pong(self):
         self.__transport.write(ltd.encode_empty_cmd("m"))
 
@@ -221,7 +218,7 @@ class Client:
         self.__transport.close()
 
     async def read(self):
-        t, p = await self.messageq.get()
+        t, p = await self.__queue.get()
 
         fields = [f.decode("UTF-8").strip("\0") for f in ltd.split(p)]
 
@@ -232,7 +229,15 @@ class Client:
     def __process_message__(self, t, fields):
         if t == "l":
             self.pong()
-        elif t == "d" and len(fields) == 2:
+        elif t == "d":
+            self.__process_status_message__(t, fields)
+        elif t == "i":
+            self.__process_output_message__(t, fields)
+        elif t == "g":
+            self.quit()
+
+    def __process_status_message__(self, t, fields):
+        if len(fields) == 2:
             if fields[0] == "Status":
                 m = re.match("You are now in group ([^\s\.]+)", fields[1])
 
@@ -279,7 +284,9 @@ class Client:
                     self.__state.moderator = parts[0]
             elif fields[0] == "Register" and fields[1].startswith("Nick registered"):
                 self.__state.registered = True
-        elif t == "i" and len(fields) >= 2:
+
+    def __process_output_message__(self, t, fields):
+        if len(fields) >= 2:
             if fields[0] == "co":
                 m = re.match("Group: ([^\s\.]+)\s+\((\w{3})\) Mod: ([^\s\.]+)\s+Topic: (.*)", fields[1])
 
@@ -294,5 +301,3 @@ class Client:
                         self.__build_userlist = False
             elif fields[0] == "wl" and self.__build_userlist:
                 self.__state.add_member(fields[2])
-        elif t == "g":
-            self.quit()
