@@ -53,7 +53,7 @@ div.screen-login
 	height:100%;
 	background-size:cover;
 	background-position:50% 50%;
-	background-image:url('bg-login.jpg');
+	background-image:url('/images/bg-login.jpg');
 	background-repeat:repeat;
 }
 
@@ -236,13 +236,11 @@ td.msg.output
 	color:#393939
 }
 
-span.emoji
+img.emoji
 {
 	display:inline-block;
-	width:14px;
 	height:14px;
-	background-size:14px 14px;
-	vertical-align:top;
+	width:14px;
 }
 
 div.users

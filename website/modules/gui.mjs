@@ -141,8 +141,6 @@ export const GUI = (function()
 		}
 	});
 
-	emojify.setConfig({mode: "data-uri", "tag_type": "span"});
-
 	return Object.freeze(
 	{
 		hideLogin: function()
