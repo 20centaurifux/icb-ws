@@ -34,7 +34,6 @@ export function Client(username, password, nick, group)
 	const _password = password;
 	const _nick = nick;
 	const _group = group;
-	let _started = false;
 	let _onConnectionStateChanged = function(sender, state) {}
 	let _onMessage = function(sender, message) {}
 	let _onSessionStateChanged = function(sender, field, value) {}
@@ -52,6 +51,7 @@ export function Client(username, password, nick, group)
 	{
 		_onMessage(this, message);
 	}
+
 	function send(json)
 	{
 		_ws.send(JSON.stringify(json));
@@ -199,58 +199,54 @@ export function Client(username, password, nick, group)
 	{
 		connect: function(url)
 		{
-			if(!_started)
+			_onConnectionStateChanged(this, ConnectionState.CONNECTING);
+
+			try
 			{
-				_started = true;
-				_onConnectionStateChanged(this, ConnectionState.CONNECTING);
+				_ws = new WebSocket(url);
 
-				try
+				_ws.onopen = () =>
 				{
-					_ws = new WebSocket(url);
+					send({"type": "a", "fields": [_username, _nick, _group, "login", _password]});
+				};
 
-					_ws.onopen = () =>
+				_ws.onmessage = e =>
+				{
+					console.log(e.data);
+
+					try
 					{
-						send({"type": "a", "fields": [_username, _nick, _group, "login", _password]});
-					};
+						const msg = eval('(' + e.data + ')');
 
-					_ws.onmessage = e =>
-					{
-						console.log(e.data);
-
-						try
+						switch(msg.kind)
 						{
-							const msg = eval('(' + e.data + ')');
+							case "ltd":
+								handle_ltd_message(msg);
+								break;
 
-							switch(msg.kind)
-							{
-								case "ltd":
-									handle_ltd_message(msg);
-									break;
+							case "session":
+								handle_session_message(msg);
+								break;
 
-								case "session":
-									handle_session_message(msg);
-									break;
-
-								case "users":
-									handle_users_message(msg);
-									break;
-							}
+							case "users":
+								handle_users_message(msg);
+								break;
 						}
-						catch(e)
-						{
-							console.log(e);
-						}
-					};
-
-					_ws.onclose = () =>
+					}
+					catch(e)
 					{
-						_onConnectionStateChanged(this, ConnectionState.DISCONNECTED);
-					};
-				}
-				catch(e)
+						console.log(e);
+					}
+				};
+
+				_ws.onclose = () =>
 				{
 					_onConnectionStateChanged(this, ConnectionState.DISCONNECTED);
-				}
+				};
+			}
+			catch(e)
+			{
+				_onConnectionStateChanged(this, ConnectionState.DISCONNECTED);
 			}
 		},
 		sendCommand: function(text)

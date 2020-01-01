@@ -35,6 +35,73 @@ ChannelListener.prototype.removed = function(sender, channelName) {}
 ChannelListener.prototype.highlighted = function(sender, channelName, highlighted) {}
 ChannelListener.prototype.received = function(sender, channelName, message) {}
 
+export function Logon()
+{
+	let _nick = null;
+	let _group = null;
+	let _loginEnabled = false;
+	const _propertyChangeListeners = new Set();
+
+	function firePropertyChanged(propertyName, oldValue, newValue)
+	{
+		if(oldValue !== newValue)
+		{
+			for(let fn of _propertyChangeListeners)
+			{
+				fn(this, propertyName, oldValue, newValue);
+			}
+		}
+	}
+
+	function isBlank(str)
+	{
+		return (!str || /^\s*$/.test(str));
+	}
+
+	function setLoginState()
+	{
+		const old = _loginEnabled;
+
+		_loginEnabled = !(isBlank(_nick) || isBlank(_group));
+
+		firePropertyChanged("loginEnabled", old, _loginEnabled);
+	}
+
+	return Object.freeze(
+	{
+		get nick()
+		{
+			return _nick;
+		},
+		set nick(nick)
+		{
+			firePropertyChanged("nick", _nick, nick);
+			_nick = nick;
+
+			setLoginState();
+		},
+		get group()
+		{
+			return _group;
+		},
+		set group(group)
+		{
+			firePropertyChanged("group", _group, group);
+			_group = group;
+
+			setLoginState();
+		},
+		get loginEnabled()
+		{
+			return _loginEnabled;
+		},
+		addPropertyChangeListener: function(fn)
+		{
+			_propertyChangeListeners.add(fn);
+		}
+	});
+}
+
 export function App()
 {
 	let _title = "";
@@ -46,7 +113,7 @@ export function App()
 	const _channelListeners = new Set();
 	const _channels = new Map();
 	let _selectedChannel = "";
-	let _userListActive = true;
+	let _userListVisible = true;
 
 	function Channel()
 	{
@@ -136,9 +203,9 @@ export function App()
 			firePropertyChanged("nick", _nick, nick);
 			_nick = nick;
 		},
-		get userListActive()
+		get userListVisible()
 		{
-			return _userListActive;
+			return _userListVisible;
 		},
 		get selectedChannel()
 		{
@@ -158,10 +225,10 @@ export function App()
 			firePropertyChanged("selectedChannel", _selectedChannel, channelName);
 			_selectedChannel = channelName;
 
-			const old = _userListActive;
+			const old = _userListVisible;
 
-			_userListActive = (_selectedChannel === "open");
-			firePropertyChanged("userListActive", old, _userListActive);
+			_userListVisible = (_selectedChannel === "open");
+			firePropertyChanged("userListVisible", old, _userListVisible);
 		},
 		closeChannel: function(channelName)
 		{

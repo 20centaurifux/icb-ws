@@ -27,48 +27,111 @@
     OTHER DEALINGS IN THE SOFTWARE.
  ***************************************************************************/
 import { ConnectionState } from "./core.mjs";
-import { App, ChannelListener } from "./viewmodel.mjs";
+import { Logon, App, ChannelListener } from "./viewmodel.mjs";
 import { GUI } from "./gui.mjs";
 import { Client } from "./client.mjs";
 import { Config } from "./config.mjs";
 
-function Channels(vm, gui)
+function Login()
+{
+	const _vm = Logon();
+
+	function bindProperties()
+	{
+		_vm.addPropertyChangeListener((sender, propertyName, oldValue, newValue) =>
+		{
+			if(propertyName === "nick")
+			{
+				GUI.loginForm = {"nick": newValue, "group": _vm.group};
+			}
+			else if(propertyName === "group")
+			{
+				GUI.loginForm = {"nick": _vm.nick, "group": newValue};
+			}
+			else if(propertyName === "loginEnabled")
+			{
+				GUI.loginEnabled = newValue;
+			}
+		});
+	}
+	function bindGUIEvents()
+	{
+		GUI.onLoginFormChanged = (sender, field, value) =>
+		{
+			switch(field)
+			{
+				case "nick":
+					_vm.nick = value;
+					break;
+
+				case "group":
+					_vm.group = value;
+					break;
+			}
+		};
+
+		GUI.onLogin = sender =>
+		{
+			if(_vm.nick && _vm.group)
+			{
+				GUI.hideLogin();
+
+				const chat = new Chat(Config.loginid, null, _vm.nick, _vm.group);
+
+				chat.init();
+				chat.start();
+			}
+		};
+	}
+
+	return Object.freeze(
+	{
+		init: function()
+		{
+			bindProperties();
+			bindGUIEvents();
+
+			_vm.nick = "";
+			_vm.group = "1";
+		}
+	});
+}
+
+function Channels(vm)
 {
 	ChannelListener.call(this);
 
 	this.vm = vm;
-	this.gui = gui;
 }
 
 Channels.prototype = Object.create(ChannelListener.prototype);
 
 Channels.prototype.added = function(sender, channelName)
 {
-	this.gui.addChannel(channelName);
+	GUI.addChannel(channelName);
 }
 
 Channels.prototype.removed = function(sender, channelName)
 {
-	this.gui.removeChannel(channelName);
+	GUI.removeChannel(channelName);
 }
 
 Channels.prototype.highlighted = function(sender, channelName, highlighted)
 {
-	this.gui.highlightChannel(channelName, highlighted);
+	GUI.highlightChannel(channelName, highlighted);
 }
 
 Channels.prototype.received = function(sender, channelName, message)
 {
 	if(this.vm.selectedChannel === channelName)
 	{
-		this.gui.writeMessage(message);
+		GUI.writeMessage(message);
 	}
 }
 
-function Chat(gui, username, password, nick, group)
+function Chat(username, password, nick, group)
 {
 	const _vm = new App();
-	const _gui = gui;
 	const _client = new Client(username, password, nick, group);
 
 	function bindProperties()
@@ -77,55 +140,55 @@ function Chat(gui, username, password, nick, group)
 		{
 			if(propertyName === "connectionState")
 			{
-				_gui.connectionState = newValue;
+				GUI.connectionState = newValue;
 			}
 			else if(propertyName === "selectedChannel")
 			{
-				_gui.selectedChannel = newValue;
-				_gui.group = _vm.group;
+				GUI.selectedChannel = newValue;
+				GUI.group = _vm.group;
 
-				_gui.clearMessages();
+				GUI.clearMessages();
 
 				const messages = _vm.getMessages(newValue);
 
 				for(let message of messages)
 				{
-					_gui.writeMessage(message);
+					GUI.writeMessage(message);
 				}
 			}
 			else if(propertyName === "group")
 			{
-				_gui.group = newValue;
+				GUI.group = newValue;
 			}
 			else if(propertyName === "title")
 			{
-				_gui.title = newValue;
+				GUI.title = newValue;
 			}
 			else if(propertyName === "nick")
 			{
-				_gui.nick = newValue;
+				GUI.nick = newValue;
 			}
 			else if(propertyName === "users")
 			{
-				_gui.users = newValue;
+				GUI.users = newValue;
 			}
-			else if(propertyName === "userListActive")
+			else if(propertyName === "userListVisible")
 			{
-				_gui.userListEnabled = newValue;
+				GUI.userListVisible = newValue;
 			}
 		});
 	}
 
 	function bindChannels()
 	{
-		_vm.addChannelListener(new Channels(_vm, _gui));
+		_vm.addChannelListener(new Channels(_vm));
 	}
 
 	function bindGUIEvents()
 	{
-		_gui.onSelectChannel = (sender, channelName) => _vm.selectedChannel = channelName;
-		_gui.onCloseChannel = (sender, channelName) => _vm.closeChannel(channelName);
-		_gui.onTextEntered = (sender, text) =>
+		GUI.onSelectChannel = (sender, channelName) => _vm.selectedChannel = channelName;
+		GUI.onCloseChannel = (sender, channelName) => _vm.closeChannel(channelName);
+		GUI.onTextEntered = (sender, text) =>
 		{
 			if(text && text.length > 0)
 			{
@@ -180,7 +243,7 @@ function Chat(gui, username, password, nick, group)
 		_client.onUsersRemoved = sender => _vm.clearUsers();
 	}
 
-	_gui.nick = nick;
+	GUI.nick = nick;
 
 	return Object.freeze(
 	{
@@ -198,37 +261,4 @@ function Chat(gui, username, password, nick, group)
 	});
 }
 
-function Login()
-{
-	const _gui = GUI();
-
-	function bindGUIEvents()
-	{
-		_gui.onLogin = sender =>
-		{
-			const credentials = _gui.credentials();
-
-			if(credentials.nick && credentials.group)
-			{
-				_gui.hideLogin();
-
-				const chat = new Chat(_gui, Config.loginid, null, credentials.nick, credentials.group);
-
-				chat.init();
-				chat.start();
-			}
-		};
-	}
-
-	return Object.freeze(
-	{
-		init: function()
-		{
-			bindGUIEvents();
-		}
-	});
-}
-
-const login = new Login();
-
-login.init();
+Login().init();

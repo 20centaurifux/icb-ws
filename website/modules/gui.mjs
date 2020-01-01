@@ -28,8 +28,9 @@
  ***************************************************************************/
 import { ConnectionState } from "./core.mjs";
 
-export const GUI = function()
+export const GUI = (function()
 {
+	let _onLoginFormChanged = function(sender, field, value) {}
 	let _onLogin = function(sender) {}
 	let _connectionState = ConnectionState.DISCONNECTED;
 	let _onSelectChannel = function(sender, channelName) {}
@@ -52,7 +53,10 @@ export const GUI = function()
 
 	function enableMessageInput(enabled)
 	{
-		document.getElementById("message-input").disabled = !enabled;
+		const input = document.getElementById("message-input");
+
+		input.disabled = !enabled;
+		input.focus();
 	}
 
 	function updateConnectionStatus(connected)
@@ -90,20 +94,34 @@ export const GUI = function()
 		div.scrollTop = div.scrollHeight;
 	}
 
+	let input = document.getElementsByName("nickname")[0];
+
+	input.addEventListener("change", event =>
+	{
+		_onLoginFormChanged(event.target, "nick", event.target.value);
+	});
+
+	input = document.getElementsByName("group")[0];
+
+	input.addEventListener("change", event =>
+	{
+		_onLoginFormChanged(event.target, "group", event.target.value);
+	});
+
 	const button = document.getElementById("login-button");
 
 	button.addEventListener("click", event =>
 	{
-		_onLogin(this);
+		_onLogin(event.target);
 	});
 
-	const input = document.getElementById("message-input");
+	input = document.getElementById("message-input");
 
 	input.addEventListener("keyup", event =>
 	{
 		if(event.key === "Enter")
 		{
-			_onTextEntered(this, input.value);
+			_onTextEntered(event.target, event.target.value);
 			input.value = "";
 		}
 	});
@@ -224,10 +242,19 @@ export const GUI = function()
 				}
 			}
 		},
-		credentials: function()
+		set loginForm(formData)
 		{
-			return { "nick": document.getElementsByName("nickname")[0].value,
-			         "group": document.getElementsByName("group")[0].value };
+			let input = document.getElementsByName("nickname")[0];
+
+			input.value = formData.nick;
+
+			input = document.getElementsByName("group")[0];
+
+			input.value = formData.group;
+		},
+		set loginEnabled(enabled)
+		{
+			document.getElementById("login-button").disabled = !enabled;
 		},
 		set title(title)
 		{
@@ -321,18 +348,22 @@ export const GUI = function()
 				ul.appendChild(li);
 			});
 		},
-		set userListEnabled(enabled)
+		set userListVisible(visible)
 		{
 			const div = document.getElementById("users-container");
 
-			if(enabled)
+			if(visible)
 			{
-				div.classList.remove("disabled");
+				div.classList.remove("hidden");
 			}
 			else
 			{
-				div.classList.add("disabled");
+				div.classList.add("hidden");
 			}
+		},
+		set onLoginFormChanged(fn)
+		{
+			_onLoginFormChanged = fn;
 		},
 		set onLogin(fn)
 		{
@@ -351,4 +382,4 @@ export const GUI = function()
 			_onTextEntered = fn;
 		}
 	});
-}
+})()

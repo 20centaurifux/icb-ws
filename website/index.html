@@ -38,24 +38,26 @@
 	<body class="body">
 		<div class="screen-login">
 			<div class="login">
-				<form>
-					<table>
-						<tr>
-							<td><label for="nickname"><b>Username</b></label></td>
-							<td><input type="text" placeholder="Enter Nickname" name="nickname" maxlength="16" required></td>
-						</tr>
+				<div class="login-form">
+					<form>
+						<table>
+							<tr>
+								<td><label for="nickname" class="login"><b>Username</b></label></td>
+								<td><input type="text" placeholder="Enter Nickname" name="nickname" maxlength="16" required autofocus class="login"></td>
+							</tr>
 
-						<tr>
-							<td><label for="group"><b>Group</b></label></td>
-							<td><input type="text" placeholder="Enter Group" name="group" value="1" maxlength="16" required></td>
-						</tr>
+							<tr>
+								<td><label for="group" class="login"><b>Group</b></label></td>
+								<td><input type="text" placeholder="Enter Group" name="group" value="1" maxlength="16" required class="login"></td>
+							</tr>
 
-						<tr>
-							<td></td>
-							<td><button id="login-button" type="button">Join Internet CB Network</button></td>
-						</tr>
-					</table>
-				</form>
+							<tr>
+								<td></td>
+								<td><button id="login-button" type="button" disabled class="login">Join Internet CB Network</button></td>
+							</tr>
+						</table>
+					</form>
+				</div>
 			</div>
 		</div>
 
