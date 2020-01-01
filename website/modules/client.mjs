@@ -243,6 +243,11 @@ export function Client(username, password, nick, group)
 				{
 					_onConnectionStateChanged(this, ConnectionState.DISCONNECTED);
 				};
+
+				_ws.onerror = () =>
+				{
+					_onConnectionStateChanged(this, ConnectionState.DISCONNECTED);
+				};
 			}
 			catch(e)
 			{
