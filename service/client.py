@@ -245,9 +245,12 @@ class Client:
                 m = re.match("([^\s\.]+) changed nickname to ([^\s\.]+)", fields[1])
 
                 if m:
-                    nick = m.group(1)
+                    old, new = m.group(1), m.group(2)
 
-                    if nick == self.__nick:
+                    self.__model.remove_member(old)
+                    self.__model.add_member(new)
+
+                    if new == self.__nick:
                         self.__model.nick = m.group(2)
                         self.__model.registered = False
             elif fields[0] == "Topic":
