@@ -28,6 +28,6 @@
  ***************************************************************************/
 export const Config = Object.freeze(
 {
-	"url": "ws://localhost:9000",
+	"url": "ws://localhost:7329",
 	"loginid": "icb-ws"
 });
