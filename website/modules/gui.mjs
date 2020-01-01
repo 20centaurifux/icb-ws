@@ -141,6 +141,8 @@ export const GUI = (function()
 		}
 	});
 
+	emojify.setConfig({mode: "data-uri", "tag_type": "span"});
+
 	return Object.freeze(
 	{
 		hideLogin: function()
@@ -333,10 +335,13 @@ export const GUI = (function()
 			cell = row.insertCell(2);
 
 			cell.className = "msg " + message.type;
-
 			cell.innerText = message.text;
-
 			cell.innerHTML = linkify(cell.innerHTML);
+
+			if(message.type === "open" || message.type === "personal")
+			{
+				emojify.run(cell);
+			}
 
 			if(autoScroll)
 			{

@@ -125,7 +125,6 @@ ul.channels
 
 li.channel
 {
-	font-family:verdana;
 	display:table-cell;
 	height:2em;
 	line-height:2em;
@@ -185,9 +184,8 @@ table.msgs
 td.msg
 {
 	vertical-align:top;
-	padding:2px;
 	line-height:1em;
-	font-size:12px;
+	font-size:16px;
 	white-space:pre-wrap;
 }
 
@@ -238,6 +236,15 @@ td.msg.output
 	color:#393939
 }
 
+span.emoji
+{
+	display:inline-block;
+	width:14px;
+	height:14px;
+	background-size:14px 14px;
+	vertical-align:top;
+}
+
 div.users
 {
 	min-width:200px;
@@ -257,9 +264,9 @@ ul.users
 
 li.user
 {
+	font-size:16px;
 	padding-left:0;
 	line-height:1.5em;
-	font-size:12px;
 }
 
 li.user:before
@@ -299,7 +306,6 @@ span.nick
 {
 	padding-left:2px;
 	padding-right:5px;
-	font-size:small;
 }
 
 @media only screen and (max-device-width:800px)
