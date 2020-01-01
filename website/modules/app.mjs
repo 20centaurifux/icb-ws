@@ -91,8 +91,8 @@ function Login()
 			bindProperties();
 			bindGUIEvents();
 
-			_vm.nick = "";
-			_vm.group = "1";
+			_vm.nick = Config.defaultNick;
+			_vm.group = Config.defaultGroup;
 		}
 	});
 }
