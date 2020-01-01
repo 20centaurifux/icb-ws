@@ -94,6 +94,21 @@ export const GUI = (function()
 		div.scrollTop = div.scrollHeight;
 	}
 
+	function linkify(text)
+	{
+		const urlRegex =/(\b((https?|ftp|file):\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+
+		return text.replace(urlRegex, url =>
+		{
+			if(url.startsWith("www."))
+			{
+				url = "http://" + url;
+			}
+
+			return '<a target="_blank" href="' + url + '">' + url + '</a>';
+		});
+	}
+
 	let input = document.getElementsByName("nickname")[0];
 
 	input.addEventListener("change", event =>
@@ -318,7 +333,10 @@ export const GUI = (function()
 			cell = row.insertCell(2);
 
 			cell.className = "msg " + message.type;
+
 			cell.innerText = message.text;
+
+			cell.innerHTML = linkify(cell.innerHTML);
 
 			if(autoScroll)
 			{
