@@ -211,6 +211,12 @@ td.msg.status
 	color:#149a80;
 }
 
+td.msg.wall
+{
+	color:#149a80;
+	font-weight:bold;
+}
+
 td.msg.error
 {
 	color:#e12e1c;

@@ -124,12 +124,24 @@ export function Client(username, password, nick, group)
 				_onConnectionStateChanged(this, ConnectionState.CONNECTED);
 				break;
 
+			case "b":
+				messageReceived({type: "open", from: msg.fields[0], text: msg.fields[1], timestamp: new Date()});
+				break;
+
+			case "c":
+				messageReceived({type: "personal", sender: msg.fields[0], text: msg.fields[1], timestamp: new Date()});
+				break;
+
 			case "d":
 				messageReceived({type: "status", category: msg.fields[0], text: msg.fields[1], timestamp: new Date()});
 				break;
 
 			case "e":
 				messageReceived({type: "error", text: msg.fields[0], timestamp: new Date()});
+				break;
+
+			case "f":
+				messageReceived({type: "wall", from: "WALL", text: msg.fields[1], timestamp: new Date()});
 				break;
 
 			case "i":
@@ -153,14 +165,6 @@ export function Client(username, password, nick, group)
 				{
 					messageReceived({type: "output", text: format_wl(msg.fields), timestamp: new Date()});
 				}
-				break;
-
-			case "b":
-				messageReceived({type: "open", from: msg.fields[0], text: msg.fields[1], timestamp: new Date()});
-				break;
-
-			case "c":
-				messageReceived({type: "personal", sender: msg.fields[0], text: msg.fields[1], timestamp: new Date()});
 				break;
 		}
 	}
