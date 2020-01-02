@@ -261,4 +261,4 @@ function Chat(username, password, nick, group)
 	});
 }
 
-Login().init();
+window.onload = event => Login().init();

@@ -57,7 +57,6 @@ div.screen-login
 	background-repeat:repeat;
 }
 
-
 div.login
 {
 	display:flex;
@@ -71,13 +70,55 @@ div.login
 div.login-form
 {
 	background-color:white;
-	padding:15px;
+	padding:20px;
 	border-radius:5px;
+	width:400px;
 }
 
-.login
+label.login
 {
-	font-size:large;
+	line-height:2em;
+	font-size:13px;
+	font-weight:normal;
+}
+
+input.login
+{
+	border:0;
+	border-bottom;
+	outline:0;
+	font-size:18px;
+	line-height:2em;
+	display:block;
+	width:100%;
+}
+
+hr.login
+{
+	border:0;
+	height:1px;
+	background:#616161;
+	background-image:linear-gradient(to right, #616161, #717171, #616161);
+}
+
+button.login
+{
+	background-color:#393939;
+	border:0;
+	border-radius:5px;
+	color:white;
+	padding:20px;
+	text-align:center;
+	text-decoration:none;
+	display:inline-block;
+	font-size:16px;
+	width:100%;
+	margin-top:20px;
+}
+
+button.login[disabled]
+{
+	opacity:0.3;
 }
 
 div.header
@@ -173,6 +214,7 @@ div.msgs
 	flex-direction:column;
 	flex-grow:1;
 	overflow:auto;
+	border-right:1px solid #c2c2c2;
 }
 
 table.msgs
@@ -192,12 +234,14 @@ td.msg
 td.msg.timestamp
 {
 	color:#1e2b37;
+	padding-right:5px;
 }
 
 td.msg.from
 {
 	color:#2384c6;
 	text-align:right;
+	padding-right:5px;
 }
 
 td.msg.from.status
@@ -288,11 +332,10 @@ input.bottom.status { }
 
 input.bottom.input
 {
-	font-family:Courier, monospace;
 	flex-grow:1;
 	overflow:auto;
 	border:1px solid #3498DB;
-	line-height:1em;
+	font-size:16px;
 }
 
 a.reconnect
