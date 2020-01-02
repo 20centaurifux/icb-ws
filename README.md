@@ -14,4 +14,5 @@ The front-end consists only of static web pages and scripts. Set the WebSocket u
 
 The service requires [Autobahn](https://github.com/crossbario/autobahn-python/). You need at least Python 3.7 to start the service.
 
-	$ python3.7 icb-ws.py -U ws://localhost:7329 -L 127.0.0.1 -P 7329 -s internetcitizens.band -p 7326
+	$ python3.7 icb-ws.py -U wss://localhost:7329 -L 127.0.0.1 -P 7329 -s internetcitizens.band -p 7326 \
+	  --ssl-key localhost.key --ssl-cert localhost.crt

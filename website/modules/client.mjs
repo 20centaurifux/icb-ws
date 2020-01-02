@@ -244,9 +244,11 @@ export function Client(username, password, nick, group)
 					_onConnectionStateChanged(this, ConnectionState.DISCONNECTED);
 				};
 
-				_ws.onerror = () =>
+				_ws.onerror = event =>
 				{
 					_onConnectionStateChanged(this, ConnectionState.DISCONNECTED);
+
+					alert("Connection error.");
 				};
 			}
 			catch(e)

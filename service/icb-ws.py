@@ -26,6 +26,7 @@
 import sys
 import getopt
 import asyncio
+import ssl
 import json
 import log
 import client
@@ -145,7 +146,14 @@ def run(m):
 
     loop = asyncio.get_event_loop()
 
-    server = loop.create_server(factory, m["address"], m["port"])
+    sc = None
+
+    if m["ssl-cert"] and m["ssl-key"]:
+        sc = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+
+        sc.load_cert_chain(m["ssl-cert"], m["ssl-key"])
+
+    server = loop.create_server(factory, m["address"], m["port"], ssl=sc)
 
     loop.run_until_complete(server)
 
@@ -158,16 +166,22 @@ def print_usage():
     print("  -P, --port             listen port")
     print("  -s, --remote-address   ICB server address")
     print("  -p, --remote-port      ICB server port")
+    print("  --ssl-cert             SSL certificate")
+    print("  --ssl-key              private SSL key")
     print("  -h, --help             display this help and exit")
 
 def get_opts(argv):
-    options, _ = getopt.getopt(argv, "hU:L:P:s:p:", ["help", "url=", "address=", "port=", "remote-address=", "remote-port="])
+    options, _ = getopt.getopt(argv,
+                               "hU:L:P:s:p:",
+                               ["help", "url=", "address=", "port=", "remote-address=", "remote-port=", "ssl-cert=", "ssl-key="])
 
     m = {"url": "ws://localhost:7329",
          "address": "127.0.0.1",
          "port": 7329,
          "remote-address": "localhost",
          "remote-port": 7326,
+         "ssl-cert": None,
+         "ssl-key": None,
          "action": "run"}
 
     for opt, arg in options:
@@ -183,6 +197,10 @@ def get_opts(argv):
             m["remote-address"] = arg
         elif opt in ("-p", "--remote-port"):
             m["remote-port"] = int(arg)
+        elif opt in ("--ssl-cert",):
+            m["ssl-cert"] = arg
+        elif opt in ("--ssl-key",):
+            m["ssl-key"] = arg
 
     return m
 
