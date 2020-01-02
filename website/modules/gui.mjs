@@ -36,6 +36,7 @@ export const GUI = (function()
 	let _onSelectChannel = function(sender, channelName) {}
 	let _onCloseChannel = function(sender, channelName) {}
 	let _onTextEntered = function(sender, text) {}
+	let _isVisible = true;
 
 	function showConnectingScreen(visible)
 	{
@@ -141,8 +142,37 @@ export const GUI = (function()
 		}
 	});
 
+	window.addEventListener("blur", event =>
+	{
+		_isVisible = false;
+	});
+
+	window.addEventListener("focus", event =>
+	{
+		_isVisible = true;
+	});
+
+	if(Notification.permission !== 'granted')
+	{
+		Notification.requestPermission();
+	}
+
 	return Object.freeze(
 	{
+		set loginForm(formData)
+		{
+			let input = document.getElementsByName("nickname")[0];
+
+			input.value = formData.nick;
+
+			input = document.getElementsByName("group")[0];
+
+			input.value = formData.group;
+		},
+		set loginEnabled(enabled)
+		{
+			document.getElementById("login-button").disabled = !enabled;
+		},
 		hideLogin: function()
 		{
 			document.getElementsByClassName("screen-login")[0].classList.add("hidden");
@@ -152,6 +182,13 @@ export const GUI = (function()
 			showConnectingScreen(state === ConnectionState.CONNECTING);
 			updateConnectionStatus(state === ConnectionState.CONNECTED);
 			enableMessageInput(state === ConnectionState.CONNECTED);
+		},
+		notify: function(title, text)
+		{
+			if(!_isVisible)
+			{
+				new Notification(title, {icon: "/images/notification.png", body: text});
+			}
 		},
 		addChannel: function(channelName)
 		{
@@ -256,20 +293,6 @@ export const GUI = (function()
 					li.classList.remove("selected");
 				}
 			}
-		},
-		set loginForm(formData)
-		{
-			let input = document.getElementsByName("nickname")[0];
-
-			input.value = formData.nick;
-
-			input = document.getElementsByName("group")[0];
-
-			input.value = formData.group;
-		},
-		set loginEnabled(enabled)
-		{
-			document.getElementById("login-button").disabled = !enabled;
 		},
 		set title(title)
 		{

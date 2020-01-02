@@ -58,15 +58,13 @@ function Login()
 	{
 		GUI.onLoginFormChanged = (sender, field, value) =>
 		{
-			switch(field)
+			if(field === "nick")
 			{
-				case "nick":
-					_vm.nick = value;
-					break;
-
-				case "group":
-					_vm.group = value;
-					break;
+				_vm.nick = value;
+			}
+			else if(field === "group")
+			{
+				_vm.group = value;
 			}
 		};
 
@@ -218,23 +216,42 @@ function Chat(username, password, nick, group)
 		_client.onMessage = (sender, message) =>
 		{
 			_vm.appendMessage(message);
+
+			try
+			{
+				if(message.type === "personal")
+				{
+					GUI.notify(message.sender, message.text);
+				}
+				else if(message.type === "open")
+				{
+					const regex = new RegExp('\\b' + _vm.nick + '\\b');
+
+					if(regex.test(message.text))
+					{
+						GUI.notify(message.from, message.text);
+					}
+				}
+			}
+			catch(e)
+			{
+				console.warn(e);
+			}
 		};
 
 		_client.onSessionStateChanged = (sender, field, value) =>
 		{
-			switch(field)
+			if(field === "group")
 			{
-				case "group":
-					_vm.group = value;
-					break;
-
-				case "topic":
-					_vm.title = value;
-					break;
-
-				case "nick":
-					_vm.nick = value;
-					break;
+				_vm.group = value;
+			}
+			else if(field === "topic")
+			{
+				_vm.title = value;
+			}
+			else if(field === "nick")
+			{
+				_vm.nick = value;
 			}
 		};
 
@@ -242,8 +259,6 @@ function Chat(username, password, nick, group)
 		_client.onUserRemoved = (sender, nick) => _vm.removeUser(nick);
 		_client.onUsersRemoved = sender => _vm.clearUsers();
 	}
-
-	GUI.nick = nick;
 
 	return Object.freeze(
 	{
@@ -257,6 +272,7 @@ function Chat(username, password, nick, group)
 		start: function()
 		{
 			_client.connect(Config.url);
+			_vm.nick = nick;
 		}
 	});
 }
