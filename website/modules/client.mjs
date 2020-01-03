@@ -147,14 +147,14 @@ export function Client(username, password, nick, group)
 			case "i":
 				if(msg.fields[0] === "co")
 				{
-					const regexp = /<\*to: ([^\s\.]+)\*>/g;
+					const regexp = /<\*to: ([^\s\.]+)\*> (.*)/g;
 					const m = regexp.exec(msg.fields[1]);
 
 					if(m)
 					{
 						const receiver = m[1];
 
-						messageReceived({type: "personal", sender: receiver, text: msg.fields[1], timestamp: new Date()});
+						messageReceived({type: "personal", from: _nick, sender: receiver, text: m[2], timestamp: new Date()});
 					}
 					else
 					{
