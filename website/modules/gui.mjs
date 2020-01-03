@@ -180,6 +180,10 @@ export const GUI = (function()
 		_unread = 0;
 
 		hideUnreadMessage();
+
+		const input = document.getElementById("message-input");
+
+		input.focus();
 	});
 
 	if(Notification.permission !== 'granted')
