@@ -199,7 +199,7 @@ class Client:
 
         self.__transport.write(e.encode())
 
-        self.__nick = nick
+        self.__state.nick = nick
 
     def __write__(self, msg):
         self.__build_userlist = False
@@ -259,12 +259,13 @@ class Client:
                 m = re.match("([^\s\.]+) changed nickname to ([^\s\.]+)", fields[1])
 
                 if m:
+                    current = self.__state.nick
                     old, new = m.group(1), m.group(2)
 
                     self.__state.remove_member(old)
                     self.__state.add_member(new)
 
-                    if new == self.__nick:
+                    if old == self.__state.nick:
                         self.__state.nick = m.group(2)
                         self.__state.registered = False
             elif fields[0] == "Topic":
