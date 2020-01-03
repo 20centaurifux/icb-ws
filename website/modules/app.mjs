@@ -31,10 +31,12 @@ import { Logon, App, ChannelListener } from "./viewmodel.mjs";
 import { GUI } from "./gui.mjs";
 import { Client } from "./client.mjs";
 import { Config } from "./config.mjs";
+import { Storage } from "./storage.mjs";
 
 function Login()
 {
 	const _vm = Logon();
+	const _storage = Storage();
 
 	function bindProperties()
 	{
@@ -72,6 +74,16 @@ function Login()
 		{
 			if(_vm.nick && _vm.group)
 			{
+				try
+				{
+					_storage.store("lastNick", _vm.nick);
+					_storage.store("lastGroup", _vm.group);
+				}
+				catch(e)
+				{
+					console.warn(e);
+				}
+
 				GUI.showChat();
 
 				const chat = new Chat(Config.loginid, null, _vm.nick, _vm.group);
@@ -89,8 +101,25 @@ function Login()
 			bindProperties();
 			bindGUIEvents();
 
-			_vm.nick = Config.defaultNick;
-			_vm.group = Config.defaultGroup;
+			try
+			{
+				_vm.nick = _storage.load("lastNick");
+				_vm.group = _storage.load("lastGroup");
+			}
+			catch(e)
+			{
+				console.warn(e);
+			}
+
+			if(!_vm.nick)
+			{
+				_vm.nick = Config.defaultNick;
+			}
+
+			if(!_vm.group)
+			{
+				_vm.group = Config.defaultGroup;
+			}
 
 			GUI.showLogin();
 		}
