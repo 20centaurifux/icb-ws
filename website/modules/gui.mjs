@@ -37,6 +37,7 @@ export const GUI = (function()
 	let _onCloseChannel = function(sender, channelName) {}
 	let _onTextEntered = function(sender, text) {}
 	let _isVisible = true;
+	let _unread = 0;
 
 	function showConnectingScreen(visible)
 	{
@@ -97,7 +98,7 @@ export const GUI = (function()
 
 	function linkify(text)
 	{
-		const urlRegex =/(\b((https?|ftp|file):\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+		const urlRegex = /(\b((https?|ftp|file):\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
 
 		return text.replace(urlRegex, url =>
 		{
@@ -108,6 +109,32 @@ export const GUI = (function()
 
 			return '<a target="_blank" href="' + url + '">' + url + '</a>';
 		});
+	}
+
+	function showUnreadMessage()
+	{
+		const regex = /(.*) \(\d+\)/ig;
+		const m = regex.exec(document.title);
+
+		if(m)
+		{
+			document.title = m[1] + ' (' + _unread + ')';
+		}
+		else
+		{
+			document.title += ' (' + _unread + ')';
+		}
+	}
+
+	function hideUnreadMessage()
+	{
+		const regex = /(.*) \(\d+\)/ig;
+		const m = regex.exec(document.title);
+
+		if(m)
+		{
+			document.title = m[1];
+		}
 	}
 
 	let input = document.getElementsByName("nickname")[0];
@@ -150,6 +177,9 @@ export const GUI = (function()
 	window.addEventListener("focus", event =>
 	{
 		_isVisible = true;
+		_unread = 0;
+
+		hideUnreadMessage();
 	});
 
 	if(Notification.permission !== 'granted')
@@ -367,6 +397,16 @@ export const GUI = (function()
 			if(autoScroll)
 			{
 				scrollToBottom();
+			}
+
+			if(!_isVisible)
+			{
+				if(message.type === "open" || message.type === "personal" || message.type === "wall")
+				{
+					++_unread;
+
+					showUnreadMessage();
+				}
 			}
 		},
 		clearMessages: function()

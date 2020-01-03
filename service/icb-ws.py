@@ -28,6 +28,7 @@ import getopt
 import asyncio
 import ssl
 import json
+import re
 import log
 import client
 import ltd
@@ -84,7 +85,14 @@ class WSProtocol(WebSocketServerProtocol, client.StateListener):
 
         connection_lost_f = await self.__client.connect()
 
-        self.__client.login(loginid, nick, group, password if password else "")
+        address = ""
+
+        m = re.match(r"^tcp\d+:(.+):\d+$", self.peer)
+
+        if m:
+            address = m.group(1)
+
+        self.__client.login(loginid, nick, group, password if password else "", address)
 
         msg_f = asyncio.ensure_future(self.__client.read())
 

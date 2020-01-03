@@ -29,7 +29,7 @@
 export const Config = Object.freeze(
 {
 	"url": "ws://localhost:7329",
-	"loginid": "icb-ws",
+	"loginid": "webuser",
 	"defaultNick": "",
-	"defaultGroup": "1"
+	"defaultGroup": "1337"
 });

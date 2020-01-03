@@ -186,7 +186,7 @@ class Client:
 
         return on_conn_lost
 
-    def login(self, loginid, nick, group="", password=""):
+    def login(self, loginid, nick, group="", password="", address=""):
         e = ltd.Encoder("a")
 
         e.add_field_str(loginid)
@@ -194,6 +194,8 @@ class Client:
         e.add_field_str(group)
         e.add_field_str("login")
         e.add_field_str(password)
+        e.add_field_str("")
+        e.add_field_str(address)
 
         self.__transport.write(e.encode())
 
