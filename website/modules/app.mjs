@@ -72,7 +72,7 @@ function Login()
 		{
 			if(_vm.nick && _vm.group)
 			{
-				GUI.hideLogin();
+				GUI.showChat();
 
 				const chat = new Chat(Config.loginid, null, _vm.nick, _vm.group);
 
@@ -91,6 +91,8 @@ function Login()
 
 			_vm.nick = Config.defaultNick;
 			_vm.group = Config.defaultGroup;
+
+			GUI.showLogin();
 		}
 	});
 }

@@ -203,7 +203,11 @@ export const GUI = (function()
 		{
 			document.getElementById("login-button").disabled = !enabled;
 		},
-		hideLogin: function()
+		showLogin: function()
+		{
+			document.getElementsByClassName("screen-blank")[0].classList.add("hidden");
+		},
+		showChat: function()
 		{
 			document.getElementsByClassName("screen-login")[0].classList.add("hidden");
 		},
