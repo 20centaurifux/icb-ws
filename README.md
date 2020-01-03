@@ -16,3 +16,7 @@ The service requires [Autobahn](https://github.com/crossbario/autobahn-python/).
 
 	$ python3.7 icb-ws.py -U wss://localhost:7329 -L 127.0.0.1 -P 7329 -s internetcitizens.band -p 7326 \
 	  --ssl-key localhost.key --ssl-cert localhost.crt
+
+## Demo
+
+You can find a demo on [https://chat.internetcitizens.band](https://chat.internetcitizens.band).
