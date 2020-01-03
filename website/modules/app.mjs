@@ -232,6 +232,10 @@ function Chat(username, password, nick, group)
 						GUI.notify(message.from, message.text);
 					}
 				}
+				else if(message.type === "wall")
+				{
+					GUI.notify("WALL", message.text);
+				}
 			}
 			catch(e)
 			{
