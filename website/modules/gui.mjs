@@ -139,14 +139,14 @@ export const GUI = (function()
 
 	let input = document.getElementsByName("nickname")[0];
 
-	input.addEventListener("change", event =>
+	input.addEventListener("keyup", event =>
 	{
 		_onLoginFormChanged(event.target, "nick", event.target.value);
 	});
 
 	input = document.getElementsByName("group")[0];
 
-	input.addEventListener("change", event =>
+	input.addEventListener("keyup", event =>
 	{
 		_onLoginFormChanged(event.target, "group", event.target.value);
 	});
