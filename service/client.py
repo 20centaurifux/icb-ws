@@ -201,20 +201,25 @@ class Client:
 
         self.__nick = nick
 
-    def send(self, msg):
+    def __write__(self, msg):
+        self.__build_userlist = False
         self.__transport.write(msg)
 
-    def command(self, command, arg, msgid):
+    def send(self, msg):
+        self.__write__(msg)
+
+    def command(self, command, arg):
         e = ltd.Encoder("h")
 
-        e.add_field_str(command)
-        e.add_field_str(arg if not arg is None else "")
-        e.add_field_str(msgid if not msgid is None else "")
+        e.add_field_str(command, append_null=arg is None)
 
-        self.__transport.write(e.encode())
+        if arg:
+            e.add_field_str(arg if not arg is None else "", append_null=True)
+
+        self.__write__(e.encode())
 
     def pong(self):
-        self.__transport.write(ltd.encode_empty_cmd("m"))
+        self.__write__(ltd.encode_empty_cmd("m"))
 
     def quit(self):
         self.__transport.close()
@@ -247,7 +252,9 @@ class Client:
                     self.__state.group = m.group(1)
                     self.__state.remove_all_members()
 
-                    self.command("w", ".", "1")
+                    self.command("w", ".")
+
+                    self.__build_userlist = True
             elif fields[0] == "Name":
                 m = re.match("([^\s\.]+) changed nickname to ([^\s\.]+)", fields[1])
 
@@ -293,13 +300,9 @@ class Client:
                 m = re.match("Group: ([^\s\.]+)\s+\((\w{3})\) Mod: ([^\s\.]+)\s+Topic: (.*)", fields[1])
 
                 if m:
-                    if len(fields) >= 3 and fields[2] == "1":
-                        self.__build_userlist = True
-
+                    if len(fields) >= 2 and self.__build_userlist:
                         self.__state.group_status = m.group(2)
                         self.__state.moderator = m.group(3) if m.group(3) != "(None)" else None
                         self.__state.topic = m.group(4) if m.group(4) != "(None)" else None
-                    else:
-                        self.__build_userlist = False
             elif fields[0] == "wl" and self.__build_userlist:
                 self.__state.add_member(fields[2])

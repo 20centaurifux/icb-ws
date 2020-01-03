@@ -67,8 +67,12 @@ class WSProtocol(WebSocketServerProtocol, client.StateListener):
                 else:
                     e = ltd.Encoder(msg["type"])
 
-                    for f in msg["fields"]:
-                        e.add_field_str(f)
+                    count = len(msg["fields"])
+
+                    for i in range(count):
+                        f = msg["fields"][i]
+
+                        e.add_field_str(f, append_null=(count == 0 or i == count - 1))
 
                     self.__client.send(e.encode())
             except Exception as e:
@@ -96,7 +100,7 @@ class WSProtocol(WebSocketServerProtocol, client.StateListener):
 
         msg_f = asyncio.ensure_future(self.__client.read())
 
-        self.__client.command("echoback", "verbose", None)
+        self.__client.command("echoback", "verbose")
 
         running = True
 

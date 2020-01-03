@@ -292,7 +292,7 @@ export function App()
 			{
 				const old = _users.slice();
 
-				_users.clear();
+				_users = [];
 
 				firePropertyChanged("users", old, _users);
 			}
