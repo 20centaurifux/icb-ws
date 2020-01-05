@@ -267,6 +267,13 @@ function Chat(username, password, nick, group)
 				{
 					GUI.notify("WALL", message.text);
 				}
+				else if(message.type === "status")
+				{
+					if(message.category === "Notify-On" || message.category === "Notify-Off")
+					{
+						GUI.notify(message.category, message.text);
+					}
+				}
 			}
 			catch(e)
 			{
