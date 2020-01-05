@@ -144,6 +144,13 @@ export const GUI = (function()
 		_onLoginFormChanged(event.target, "nick", event.target.value);
 	});
 
+	input = document.getElementsByName("password")[0];
+
+	input.addEventListener("keyup", event =>
+	{
+		_onLoginFormChanged(event.target, "password", event.target.value);
+	});
+
 	input = document.getElementsByName("group")[0];
 
 	input.addEventListener("keyup", event =>
@@ -198,6 +205,10 @@ export const GUI = (function()
 			let input = document.getElementsByName("nickname")[0];
 
 			input.value = formData.nick;
+
+			input = document.getElementsByName("password")[0];
+
+			input.value = formData.password;
 
 			input = document.getElementsByName("group")[0];
 

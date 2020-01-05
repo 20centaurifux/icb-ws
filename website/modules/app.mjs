@@ -44,11 +44,15 @@ function Login()
 		{
 			if(propertyName === "nick")
 			{
-				GUI.loginForm = {"nick": newValue, "group": _vm.group};
+				GUI.loginForm = {"nick": newValue, "password": _vm.password, "group": _vm.group};
+			}
+			else if(propertyName === "password")
+			{
+				GUI.loginForm = {"nick": _vm.nick, "password": newValue, "group": _vm.group};
 			}
 			else if(propertyName === "group")
 			{
-				GUI.loginForm = {"nick": _vm.nick, "group": newValue};
+				GUI.loginForm = {"nick": _vm.nick, "password": _vm.password, "group": newValue};
 			}
 			else if(propertyName === "loginEnabled")
 			{
@@ -63,6 +67,10 @@ function Login()
 			if(field === "nick")
 			{
 				_vm.nick = value;
+			}
+			else if(field === "password")
+			{
+				_vm.password = value;
 			}
 			else if(field === "group")
 			{
@@ -86,7 +94,7 @@ function Login()
 
 				GUI.showChat();
 
-				const chat = new Chat(Config.loginid, null, _vm.nick, _vm.group);
+				const chat = new Chat(Config.loginid, _vm.nick, _vm.password, _vm.group);
 
 				chat.init();
 				chat.start();
@@ -120,6 +128,8 @@ function Login()
 			{
 				_vm.group = Config.defaultGroup;
 			}
+
+			_vm.password = "";
 
 			GUI.showLogin();
 		}
@@ -158,10 +168,10 @@ Channels.prototype.received = function(sender, channelName, message)
 	}
 }
 
-function Chat(username, password, nick, group)
+function Chat(loginid, nick, password, group)
 {
 	const _vm = new App();
-	const _client = new Client(username, password, nick, group);
+	const _client = new Client(loginid, nick, password, group);
 
 	function bindProperties()
 	{

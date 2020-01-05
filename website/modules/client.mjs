@@ -28,9 +28,9 @@
  ***************************************************************************/
 import { ConnectionState } from "./core.mjs";
 
-export function Client(username, password, nick, group)
+export function Client(loginid, nick, password, group)
 {
-	const _username = username;
+	const _loginid = loginid;
 	const _password = password;
 	const _nick = nick;
 	const _group = group;
@@ -179,19 +179,17 @@ export function Client(username, password, nick, group)
 
 	function handle_users_message(msg)
 	{
-		switch(msg.action)
+		if(msg.action === "add")
 		{
-			case "add":
-				_onUserAdded(this, msg.nick);
-				break;
-
-			case "remove":
-				_onUserRemoved(this, msg.nick);
-				break;
-
-			case "clear":
-				_onUsersRemoved(this);
-				break;
+			_onUserAdded(this, msg.nick);
+		}
+		else if(msg.action === "remove")
+		{
+			_onUserRemoved(this, msg.nick);
+		}
+		else if(msg.action === "clear")
+		{
+			_onUsersRemoved(this);
 		}
 	}
 
@@ -207,7 +205,7 @@ export function Client(username, password, nick, group)
 
 				_ws.onopen = () =>
 				{
-					send({"type": "a", "fields": [_username, _nick, _group, "login", _password]});
+					send({"type": "a", "fields": [_loginid, _nick, _group, "login", _password]});
 				};
 
 				_ws.onmessage = e =>
@@ -218,19 +216,17 @@ export function Client(username, password, nick, group)
 					{
 						const msg = eval('(' + e.data + ')');
 
-						switch(msg.kind)
+						if(msg.kind === "ltd")
 						{
-							case "ltd":
-								handle_ltd_message(msg);
-								break;
-
-							case "session":
-								handle_session_message(msg);
-								break;
-
-							case "users":
-								handle_users_message(msg);
-								break;
+							handle_ltd_message(msg);
+						}
+						else if(msg.kind === "session")
+						{
+							handle_session_message(msg);
+						}
+						else if(msg.kind === "users")
+						{
+							handle_users_message(msg);
 						}
 					}
 					catch(e)

@@ -37,8 +37,9 @@ ChannelListener.prototype.received = function(sender, channelName, message) {}
 
 export function Logon()
 {
-	let _nick = null;
-	let _group = null;
+	let _nick = "";
+	let _group = "";
+	let _password = "";
 	let _loginEnabled = false;
 	const _propertyChangeListeners = new Set();
 
@@ -79,6 +80,15 @@ export function Logon()
 			_nick = nick;
 
 			setLoginState();
+		},
+		get password()
+		{
+			return _password;
+		},
+		set password(password)
+		{
+			firePropertyChanged("password", _password, password);
+			_password = password;
 		},
 		get group()
 		{
