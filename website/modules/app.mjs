@@ -180,6 +180,11 @@ function Chat(loginid, nick, password, group)
 			if(propertyName === "connectionState")
 			{
 				GUI.connectionState = newValue;
+
+				if(newValue === ConnectionState.DISCONNECTED)
+				{
+					GUI.notify("Connection", "You're disconnected from ICB :(");
+				}
 			}
 			else if(propertyName === "selectedChannel")
 			{
