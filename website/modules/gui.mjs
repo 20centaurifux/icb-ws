@@ -144,6 +144,11 @@ export const GUI = (function()
 		_onLoginFormChanged(event.target, "nick", event.target.value);
 	});
 
+	input.addEventListener("change", event =>
+	{
+		_onLoginFormChanged(event.target, "nick", event.target.value);
+	});
+
 	input = document.getElementsByName("password")[0];
 
 	input.addEventListener("keyup", event =>
@@ -151,9 +156,19 @@ export const GUI = (function()
 		_onLoginFormChanged(event.target, "password", event.target.value);
 	});
 
+	input.addEventListener("change", event =>
+	{
+		_onLoginFormChanged(event.target, "password", event.target.value);
+	});
+
 	input = document.getElementsByName("group")[0];
 
 	input.addEventListener("keyup", event =>
+	{
+		_onLoginFormChanged(event.target, "group", event.target.value);
+	});
+
+	input.addEventListener("change", event =>
 	{
 		_onLoginFormChanged(event.target, "group", event.target.value);
 	});
