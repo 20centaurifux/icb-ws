@@ -10,6 +10,9 @@ A Python WebSocket service allows the browser to connect to a Internet CB Networ
 
 The front-end consists only of static web pages and scripts. Set the WebSocket url in modules/config.mjs.
 
+![alt text](media/login.jpg "login")
+![alt text](media/chat.jpg "chat")
+
 ## Service
 
 The service requires [Autobahn](https://github.com/crossbario/autobahn-python/). You need at least Python 3.7 to start the service.
