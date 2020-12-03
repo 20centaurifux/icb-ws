@@ -288,12 +288,37 @@ class Client:
                     if parts:
                         self.__state.remove_member(parts[0])
             elif fields[0] == "Pass":
-                parts = fields[1].split(" ")
+                m = re.match(".* has passed moderation to ([^\s\.]+)", fields[1])
 
-                if(parts):
-                    self.__state.moderator = parts[0]
+                if m:
+                    self.__state.moderator = m.group(1)
+                else:
+                    if "is now mod" in fields[1]:
+                        self.__state.moderator = fields[1].split(" ")[0]
             elif fields[0] == "Register" and fields[1].startswith("Nick registered"):
                 self.__state.registered = True
+            elif fields[0] == "Change":
+                m = re.match(".* is now ([^\s\.]+)", fields[1])
+
+                status = self.__state.group_status
+
+                if m:
+                    flag = m.group(1)[0]
+
+                    if flag in "pmrc":
+                        self.__state.group_status = flag + status[1:]
+                else:
+                    m = re.match(".* made group ([^\s\.]+)", fields[1])
+
+                    if m:
+                        flag = m.group(1)[0]
+
+                        if flag in "isv":
+                            self.__state.group_status = "%s%s%s" % (status[0], flag, status[1])
+                        elif flag in "qnl":
+                            self.__state.group_status = status[:2] + flag
+                    elif "just relinquished moderation" in fields[1]:
+                        self.__state.moderator = None
 
     def __process_output_message__(self, t, fields):
         if len(fields) >= 2:
