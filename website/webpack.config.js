@@ -1,14 +1,12 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
   entry: './src/main.js',
   context: path.resolve(__dirname),
-  devServer: {
-    writeToDisk: true
-  },
   module: {
     rules: [
       {
@@ -33,10 +31,11 @@ module.exports = {
     ]
   },
   output: {
-    filename: 'ICBundle.js',
+    filename: 'ICBundle.[fullhash].js',
     path: path.resolve(__dirname, 'dist')
   },
   plugins: [
+    new CleanWebpackPlugin(),
     new CopyPlugin({
       patterns: [
         {
