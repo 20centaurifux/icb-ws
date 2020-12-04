@@ -8,10 +8,14 @@ A Python WebSocket service allows the browser to connect to a Internet CB Networ
 
 ## Website
 
-The front-end consists only of static web pages and scripts. Set the WebSocket url in modules/config.mjs.
+The front-end consists of a single web page.
 
 ![alt text](media/login.jpg "login")
 ![alt text](media/chat.jpg "chat")
+
+Set the WebSocket url in config.mjs. Then build the website with npm:
+
+	npm run build
 
 ## Service
 
