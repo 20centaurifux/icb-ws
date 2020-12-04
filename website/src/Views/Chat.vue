@@ -53,6 +53,7 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import { ConnectionState } from '../Services/core.mjs'
 import { RXClient } from '../Services/client.rx.mjs'
 import { map, tap, filter } from 'rxjs/operators'
@@ -74,7 +75,8 @@ export default {
       nickname: '',
       channels: [],
       selectedChannel: null,
-      topic: ''
+      topic: '',
+      unread: 0
     }
   },
   mounted: function () {
@@ -188,6 +190,7 @@ export default {
     handleMessage: function (msg) {
       this.appendMessageToChannel(msg)
       this.notifyMessage(msg)
+      this.incrementUnreadMessages(msg)
     },
     appendMessageToChannel: function (msg) {
       let channelName = ''
@@ -262,6 +265,15 @@ export default {
         new Notification(sender || 'Internet CB Network', { icon: '/images/notification.png', body: text })
       }
     },
+    incrementUnreadMessages: function (msg) {
+      if (this.$store.state.windowState === 'hidden') {
+        if (msg.type === 'personal' || msg.type === 'open') {
+          ++this.unread
+
+          document.title = 'Internet CB Network (' + this.unread + ')'
+        }
+      }
+    },
     selectChannel: function (channel) {
       this.selectedChannel = channel
 
@@ -317,6 +329,15 @@ export default {
         }
 
         channel.text = ''
+      }
+    }
+  },
+  watch: {
+    '$store.state.windowState': function (value) {
+      if (value === 'visible') {
+        Vue.nextTick(() => (document.title = 'Internet CB Network'))
+
+        this.unread = 0
       }
     }
   }
