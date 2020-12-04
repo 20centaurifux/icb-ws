@@ -313,7 +313,9 @@ class Client:
                     if m:
                         flag = m.group(1)[0]
 
-                        if flag in "isv":
+                        if flag in "pmrc":
+                            self.__state.group_status = flag + status[1:]
+                        elif flag in "isv":
                             self.__state.group_status = "%s%s%s" % (status[0], flag, status[1])
                         elif flag in "qnl":
                             self.__state.group_status = status[:2] + flag
