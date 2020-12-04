@@ -41,3 +41,7 @@ new Vue({
   store: Store,
   render: h => h(App)
 });
+
+if (Notification.permission !== 'granted') {
+  Notification.requestPermission();
+}

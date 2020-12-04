@@ -186,6 +186,10 @@ export default {
       }
     },
     handleMessage: function (msg) {
+      this.appendMessageToChannel(msg)
+      this.notifyMessage(msg)
+    },
+    appendMessageToChannel: function (msg) {
       let channelName = ''
 
       let autoSelect = false
@@ -226,13 +230,37 @@ export default {
           highlight: true,
           selected: false,
           messages: [],
-          users: [this.nickname, name.substring(1)], moderator: '', text: '' 
+          users: [this.nickname, name.substring(1)],
+          moderator: '',
+          text: ''
         }
 
         this.channels.push(channel)
       }
 
       return channel
+    },
+    notifyMessage: function (msg) {
+      if (msg.type === 'personal') {
+        this.notify(msg.sender, msg.text)
+      } else if (msg.type === 'open') {
+        const regex = new RegExp('\\b' + this.nickname + '\\b')
+
+        if (regex.test(msg.text)) {
+          this.notify(msg.sender, msg.text)
+        }
+      } else if (msg.type === 'wall') {
+        this.notify('WALL', msg.text)
+      } else if (msg.type === 'status') {
+        if (msg.sender === 'Notify-On' || msg.sender === 'Notify-Off') {
+          this.notify(msg.sender, msg.text)
+        }
+      }
+    },
+    notify: function (sender, text) {
+      if (this.$store.state.windowState === 'hidden') {
+        new Notification(sender || 'Internet CB Network', { icon: '/images/notification.png', body: text })
+      }
     },
     selectChannel: function (channel) {
       this.selectedChannel = channel

@@ -44,6 +44,10 @@ module.exports = {
           to: path.resolve(__dirname, 'dist')
         },
         {
+          from: path.resolve(__dirname, 'src', 'assets', 'notification.png'),
+          to: path.resolve(__dirname, 'dist', 'images')
+        },
+        {
           from: path.resolve(__dirname, 'node_modules', 'emojify.js', 'dist', 'images', 'basic'),
           to: path.resolve(__dirname, 'dist', 'images', 'emoji')
         }
@@ -54,4 +58,4 @@ module.exports = {
       template: './src/index.html'
     })
   ]
-};
+}
