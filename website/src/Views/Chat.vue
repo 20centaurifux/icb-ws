@@ -267,7 +267,7 @@ export default {
       } else if (msg.type === 'wall') {
         this.notify('WALL', msg.text)
       } else if (msg.type === 'status') {
-        if (['Sign-on', 'Sign-off', 'Notify-On', 'Notify-Off'].includes(msg.category)) {
+        if (['Notify-On', 'Notify-Off'].includes(msg.category)) {
           this.notify(msg.category, msg.text)
         }
       }
