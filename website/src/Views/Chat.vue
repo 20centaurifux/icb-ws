@@ -100,30 +100,38 @@ export default {
 
       this.client = new RXClient(Config.loginid, credentials.nickname, credentials.password, credentials.group)
 
-      this.client.connection.subscribe(newState => (this.state = newState))
-      this.client.session.subscribe(newState => this.updateSession(newState.field, newState.value))
+      this.client.connection
+        .subscribe(newState => (this.state = newState))
 
-      this.client.messages
-        .pipe(map(msg => this.messageToViewModel(msg)),
-          filter(msg => {
-            let ignore = false
+      this.client.session
+        .subscribe(newState => this.updateSession(newState.field, newState.value))
 
-            if (msg.type === 'personal' && msg.sender === this.nickname) {
-              ignore = (msg.to === undefined || msg.to === msg.sender)
-            }
+      const filteredMessages = this.client.messages
+        .pipe(
+          filter(this.acceptMessage))
 
-            return !ignore
-          }),
-          tap(msg => this.handleMessage(msg)))
+      filteredMessages
+        .pipe(
+          map(this.messageToViewModel),
+          tap(this.appendMessageToChannel))
+        .subscribe()
+
+      filteredMessages
+        .pipe(
+          filter(_ => this.$store.state.windowState === 'hidden'),
+          tap(this.notifyMessage),
+          tap(this.incrementUnreadMessages))
         .subscribe()
 
       this.client.users
-        .pipe(filter(action => action.action === 'add'),
+        .pipe(
+          filter(action => action.action === 'add'),
           tap(action => channel.users.push(action.nick)))
         .subscribe()
 
       this.client.users
-        .pipe(filter(action => action.action === 'remove'),
+        .pipe(
+          filter(action => action.action === 'remove'),
           tap(action => {
             if (action.nick === '*') {
               channel.users.splice(0, channel.users.length)
@@ -157,40 +165,32 @@ export default {
     updateSession: function (field, value) {
       let props = null
 
-      switch (field) {
-        case 'nick':
-          this.nickname = value
-          break
-
-        case 'group':
-          props = { name: value }
-          break
-
-        case 'group_status':
-          props = { status: value }
-          break
-
-        case 'moderator':
-          props = { moderator: value }
-          break
-
-        case 'topic':
-          this.topic = value
-          break
-
-        default:
-          console.warn('Unexpected session field: ' + field)
-          break
+      if (field === 'nick') {
+        this.nickname = value
+      } else if (field === 'group') {
+        props = { name: value }
+      } else if (field === 'group_status') {
+        props = { status: value }
+      } else if (field === 'moderator') {
+        props = { moderator: value }
+      } else if (field === 'topic') {
+        this.topic = value
+      } else {
+        console.warn('Unexpected session field: ' + field)
       }
 
       if (props) {
         this.$set(this.channels, 0, Object.assign(this.channels[0], props))
       }
     },
-    handleMessage: function (msg) {
-      this.appendMessageToChannel(msg)
-      this.notifyMessage(msg)
-      this.incrementUnreadMessages(msg)
+    acceptMessage: function (msg) {
+      let bypass = false
+
+      if (msg.type === 'personal' && (msg.sender === this.nickname || msg.from === this.nickname)) {
+        bypass = (msg.to === undefined || msg.to === this.nickname)
+      }
+
+      return !bypass
     },
     appendMessageToChannel: function (msg) {
       let channelName = ''
@@ -255,23 +255,19 @@ export default {
       } else if (msg.type === 'wall') {
         this.notify('WALL', msg.text)
       } else if (msg.type === 'status') {
-        if (msg.sender === 'Notify-On' || msg.sender === 'Notify-Off') {
-          this.notify(msg.sender, msg.text)
+        if (['Sign-on', 'Sign-off', 'Notify-On', 'Notify-Off'].includes(msg.category)) {
+          this.notify(msg.category, msg.text)
         }
       }
     },
     notify: function (sender, text) {
-      if (this.$store.state.windowState === 'hidden') {
-        new Notification(sender || 'Internet CB Network', { icon: '/images/notification.png', body: text })
-      }
+      new Notification(sender || 'Internet CB Network', { icon: '/images/notification.png', body: text })
     },
     incrementUnreadMessages: function (msg) {
-      if (this.$store.state.windowState === 'hidden') {
-        if (msg.type === 'personal' || msg.type === 'open') {
-          ++this.unread
+      if (['personal', 'open', 'wall', 'status'].includes(msg.type)) {
+        ++this.unread
 
-          document.title = 'Internet CB Network (' + this.unread + ')'
-        }
+        document.title = 'Internet CB Network (' + this.unread + ')'
       }
     },
     selectChannel: function (channel) {
