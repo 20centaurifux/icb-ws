@@ -61,7 +61,7 @@ export default {
         this.startMargin = this.margin
         this.dragging = false
       }
-    },
+    }
   }
 }
 </script>

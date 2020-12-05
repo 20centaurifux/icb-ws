@@ -51,7 +51,7 @@ export default {
       const div = this.$refs.viewport
 
       this.atBottom = (div.scrollHeight <= (div.scrollTop + div.clientHeight))
-    },
+    }
   },
   watch: {
     visible: function (value) {

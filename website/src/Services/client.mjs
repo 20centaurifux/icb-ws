@@ -1,5 +1,7 @@
 import { ConnectionState } from './core.mjs'
 
+/* eslint-disable accessor-pairs, no-eval */
+
 export function Client (loginid, nick, password, group) {
   const _loginid = loginid
   const _password = password
@@ -120,8 +122,7 @@ export function Client (loginid, nick, password, group) {
     if (msg.field) {
       if (msg.field === 'nick') {
         _nick = msg.value
-      }
-      else if (msg.field === 'group') {
+      } else if (msg.field === 'group') {
         _group = msg.value
       }
 
@@ -202,7 +203,7 @@ export function Client (loginid, nick, password, group) {
     sendPersonal: function (receiver, text) {
       send({ type: 'h', fields: ['m', receiver + ' ' + text] })
     },
-    set onConnectionStateChanged(fn) {
+    set onConnectionStateChanged (fn) {
       _onConnectionStateChanged = fn
     },
     set onMessage (fn) {
@@ -211,13 +212,13 @@ export function Client (loginid, nick, password, group) {
     set onSessionStateChanged (fn) {
       _onSessionStateChanged = fn
     },
-    set onUserAdded(fn) {
+    set onUserAdded (fn) {
       _onUserAdded = fn
     },
     set onUserRemoved (fn) {
       _onUserRemoved = fn
     },
-    set onUsersRemoved(fn) {
+    set onUsersRemoved (fn) {
       _onUsersRemoved = fn
     }
   })

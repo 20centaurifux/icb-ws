@@ -35,13 +35,13 @@ const router = new VueRouter({
   routes: routes
 })
 
-new Vue({
+new Vue({ // eslint-disable-line no-new
   el: '#app',
   router: router,
   store: Store,
   render: h => h(App)
-});
+})
 
 if (Notification.permission !== 'granted') {
-  Notification.requestPermission();
+  Notification.requestPermission()
 }

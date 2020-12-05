@@ -273,7 +273,9 @@ export default {
       }
     },
     notify: function (sender, text) {
-      new Notification(sender || 'Internet CB Network', { icon: '/images/notification.png', body: text })
+      new Notification( // eslint-disable-line no-new
+        sender || 'Internet CB Network',
+        { icon: '/images/notification.png', body: text })
     },
     incrementUnreadMessages: function (msg) {
       if (['personal', 'open', 'wall', 'status'].includes(msg.type)) {

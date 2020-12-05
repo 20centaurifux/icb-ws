@@ -10,11 +10,11 @@ export default
   created: function () {
     const store = this.$store
 
-    window.addEventListener('focus', function() {
+    window.addEventListener('focus', function () {
       store.commit('visible')
     })
 
-    window.addEventListener('blur', function() {
+    window.addEventListener('blur', function () {
       store.commit('hidden')
     })
   }
