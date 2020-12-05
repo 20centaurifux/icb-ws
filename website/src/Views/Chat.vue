@@ -1,5 +1,7 @@
 <template>
 <div id="page">
+  <window-title :title="title" :unread="unread"></window-title>
+
   <div id="overlay" v-if="!isConnected" />
 
   <div class="centered" v-if="isConnecting">
@@ -53,17 +55,18 @@
 </template>
 
 <script>
-import Vue from 'vue'
 import { ConnectionState } from '../Services/core.mjs'
 import { RXClient } from '../Services/client.rx.mjs'
 import { map, tap, filter } from 'rxjs/operators'
 import { Config } from '../config.mjs'
+import WindowTitle from './WindowTitle.vue'
 import ChannelList from './ChannelList.vue'
 import Messages from './Messages.vue'
 import Input from './Input.vue'
 
 export default {
   components: {
+    'window-title': WindowTitle,
     'channel-list': ChannelList,
     messages: Messages,
     'input-box': Input
@@ -151,6 +154,15 @@ export default {
     }
   },
   computed: {
+    title: function () {
+      let title = 'Internet CB Network'
+
+      if (this.channels.length > 0) {
+        title = this.channels[0].name
+      }
+
+      return title
+    },
     isConnecting: function () {
       return this.state === ConnectionState.CONNECTING
     },
@@ -266,8 +278,6 @@ export default {
     incrementUnreadMessages: function (msg) {
       if (['personal', 'open', 'wall', 'status'].includes(msg.type)) {
         ++this.unread
-
-        document.title = 'Internet CB Network (' + this.unread + ')'
       }
     },
     selectChannel: function (channel) {
@@ -331,8 +341,6 @@ export default {
   watch: {
     '$store.state.windowState': function (value) {
       if (value === 'visible') {
-        Vue.nextTick(() => (document.title = 'Internet CB Network'))
-
         this.unread = 0
       }
     }
