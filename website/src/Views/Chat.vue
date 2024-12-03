@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent, toRaw } from 'vue';
 import { ConnectionState } from '../Services/core.mjs';
 import { RXClient } from '../Services/client.rx.mjs';
 import { map, tap, filter } from 'rxjs/operators';
@@ -289,7 +289,7 @@ export default defineComponent({
     selectChannel: function (channel) {
       this.selectedChannel = channel;
 
-      this.channels.forEach((c) => (c.selected = c === channel));
+      this.channels.forEach((c) => c.selected = (toRaw(c) === toRaw(channel)));
 
       channel.highlight = false;
     },
