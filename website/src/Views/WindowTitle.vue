@@ -1,33 +1,36 @@
 <script>
-import Vue from 'vue'
+import { defineComponent, nextTick } from 'vue';
 
-export default {
+export default defineComponent({
   props: ['title', 'unread'],
   render: () => '',
+
   methods: {
     updateTitle: function () {
-      let displayTitle = this.title
+      let displayTitle = this.title;
 
       if (this.$store.state.windowState === 'hidden' && this.unread > 0) {
-        displayTitle += ' (' + this.unread + ')'
+        displayTitle += ' (' + this.unread + ')';
       }
 
-      Vue.nextTick(() => (document.title = displayTitle))
-    }
+      nextTick(() => (document.title = displayTitle));
+    },
   },
+
   mounted: function () {
-    this.updateTitle()
+    this.updateTitle();
   },
+
   watch: {
     title: function () {
-      this.updateTitle()
+      this.updateTitle();
     },
     unread: function () {
-      this.updateTitle()
+      this.updateTitle();
     },
     '$store.state.windowState': function (value) {
-      this.updateTitle()
-    }
-  }
-}
+      this.updateTitle();
+    },
+  },
+});
 </script>

@@ -1,77 +1,77 @@
 <template>
-<div id="page">
-  <window-title :title="title" :unread="unread"></window-title>
+  <div id="page">
+    <window-title :title="title" :unread="unread"></window-title>
 
-  <div id="overlay" v-if="!isConnected" />
+    <div id="overlay" v-if="!isConnected" />
 
-  <div class="centered" v-if="isConnecting">
-    <font-awesome-icon icon="spinner" size="2x" pulse />
+    <div class="centered" v-if="isConnecting">
+      <font-awesome-icon icon="spinner" size="2x" pulse />
 
-    <div style="padding:15px;">
-      Connecting to Internet CB Network...
+      <div style="padding: 15px">Connecting to Internet CB Network...</div>
     </div>
-  </div>
 
-  <div class="centered" v-if="isDisconnected">
-    <div class="dialog">
-      <div style="float:left;">
-        <font-awesome-icon icon="unlink" size="4x" />
+    <div class="centered" v-if="isDisconnected">
+      <div class="dialog">
+        <div style="float: left">
+          <font-awesome-icon icon="unlink" size="4x" />
+        </div>
+
+        <div style="float: left; padding: 15px; width: 300px">
+          Ooooops... something went wrong. Please open
+          <router-link to="/">login page</router-link> and try again.
+        </div>
+      </div>
+    </div>
+
+    <div id="chat">
+      <div id="header">
+        <div style="flex-grow: 1">Internet CB Network</div>
+        <div v-if="topic">{{ topic }}</div>
       </div>
 
-     <div style="float:left; padding:15px; width:300px;">
-        Ooooops... something went wrong. Please open <router-link to="/">login page</router-link> and try again.
-     </div>
+      <channel-list :channels="channels" @click="selectChannel" @close="closeChannel"> </channel-list>
+
+      <messages
+        v-for="(channel, i) in channels"
+        :visible="channel === selectedChannel"
+        :key="'messages-' + i"
+        :messages="channel.messages"
+        :users="channel.users"
+        :moderator="channel.moderator">
+      </messages>
+
+      <input-box
+        v-for="(channel, i) in channels"
+        :key="'input-' + i"
+        :visible="channel === selectedChannel"
+        :nickname="nickname"
+        v-model="channel.text"
+        @send="sendMessage(channel)">
+      </input-box>
     </div>
   </div>
-
-  <div id="chat">
-    <div id="header">
-      <div style="flex-grow:1">Internet CB Network</div>
-      <div v-if="topic">{{ topic }}</div>
-    </div>
-
-    <channel-list :channels="channels"
-                  @click="selectChannel"
-                  @close="closeChannel">
-    </channel-list>
-
-    <messages v-for="(channel, i) in channels"
-              :visible="channel === selectedChannel"
-              :key="'messages-' + i"
-              :messages="channel.messages"
-              :users="channel.users"
-              :moderator="channel.moderator">
-    </messages>
-
-    <input-box v-for="(channel, i) in channels"
-               :key="'input-' + i"
-               :visible="channel === selectedChannel"
-               :nickname="nickname"
-               v-model="channel.text"
-               @send="sendMessage(channel)">
-    </input-box>
-  </div>
-</div>
 </template>
 
 <script>
-import { ConnectionState } from '../Services/core.mjs'
-import { RXClient } from '../Services/client.rx.mjs'
-import { map, tap, filter } from 'rxjs/operators'
-import { Config } from '../config.mjs'
-import WindowTitle from './WindowTitle.vue'
-import ChannelList from './ChannelList.vue'
-import Messages from './Messages.vue'
-import Input from './Input.vue'
+import { defineComponent } from 'vue';
+import { ConnectionState } from '../Services/core.mjs';
+import { RXClient } from '../Services/client.rx.mjs';
+import { map, tap, filter } from 'rxjs/operators';
+import { Config } from '../config.mjs';
+import WindowTitle from './WindowTitle.vue';
+import ChannelList from './ChannelList.vue';
+import Messages from './Messages.vue';
+import Input from './Input.vue';
 
-export default {
+export default defineComponent({
   components: {
     'window-title': WindowTitle,
     'channel-list': ChannelList,
     messages: Messages,
-    'input-box': Input
+    'input-box': Input,
   },
-  data () {
+
+  data() {
     return {
       client: RXClient,
       state: ConnectionState.UNDEFINED,
@@ -79,165 +79,163 @@ export default {
       channels: [],
       selectedChannel: null,
       topic: '',
-      unread: 0
-    }
+      unread: 0,
+    };
   },
+
   mounted: function () {
-    const credentials = this.$route.params.credentials
+    const credentials = this.$route.query;
 
     if (credentials) {
-      this.nickname = credentials.nickname
+      this.nickname = credentials.nickname;
 
-      const channel = this.selectedChannel = {
+      const channel = (this.selectedChannel = {
         name: '...',
         selected: true,
         highlight: false,
         messages: [],
         users: [],
         moderator: '',
-        text: ''
-      }
+        text: '',
+      });
 
-      this.channels.push(channel)
-      this.selectedChannel = channel
+      this.channels = [...this.channels, channel];
+      this.selectedChannel = channel;
 
-      this.client = new RXClient(Config.loginid, credentials.nickname, credentials.password, credentials.group)
+      this.client = new RXClient(Config.loginid, credentials.nickname, credentials.password, credentials.group);
 
-      this.client.connection
-        .subscribe(newState => (this.state = newState))
+      this.client.connection.subscribe((newState) => (this.state = newState));
 
-      this.client.session
-        .subscribe(newState => this.updateSession(newState.field, newState.value))
+      this.client.session.subscribe((newState) => this.updateSession(newState.field, newState.value));
 
-      const filteredMessages = this.client.messages
-        .pipe(
-          filter(this.acceptMessage))
+      const filteredMessages = this.client.messages.pipe(filter(this.acceptMessage));
+
+      filteredMessages.pipe(map(this.messageToViewModel), tap(this.appendMessageToChannel)).subscribe();
 
       filteredMessages
         .pipe(
-          map(this.messageToViewModel),
-          tap(this.appendMessageToChannel))
-        .subscribe()
-
-      filteredMessages
-        .pipe(
-          filter(_ => this.$store.state.windowState === 'hidden'),
+          filter((_) => this.$store.state.windowState === 'hidden'),
           tap(this.notifyMessage),
-          tap(this.incrementUnreadMessages))
-        .subscribe()
+          tap(this.incrementUnreadMessages)
+        )
+        .subscribe();
 
       this.client.users
         .pipe(
-          filter(action => action.action === 'add'),
-          tap(action => channel.users.push(action.nick)))
-        .subscribe()
+          filter((action) => action.action === 'add'),
+          tap((action) => (channel.users = [...channel.users, action.nick]))
+        )
+        .subscribe();
 
       this.client.users
         .pipe(
-          filter(action => action.action === 'remove'),
-          tap(action => {
+          filter((action) => action.action === 'remove'),
+          tap((action) => {
             if (action.nick === '*') {
-              channel.users.splice(0, channel.users.length)
+              channel.users.splice(0, channel.users.length);
             } else {
-              const index = channel.users.indexOf(action.nick)
+              const index = channel.users.indexOf(action.nick);
 
               if (index !== -1) {
-                channel.users.splice(index, 1)
+                channel.users.splice(index, 1);
               }
             }
-          }))
-        .subscribe()
+          })
+        )
+        .subscribe();
 
-      this.client.connect(Config.url)
+      this.client.connect(Config.url);
     } else {
-      this.$router.replace({ name: 'root' })
+      this.$router.replace({ name: 'root' });
     }
   },
+
   computed: {
     title: function () {
-      let title = 'Internet CB Network'
+      let title = 'Internet CB Network';
 
       if (this.channels.length > 0) {
-        title = this.channels[0].name
+        title = this.channels[0].name;
       }
 
-      return title
+      return title;
     },
     isConnecting: function () {
-      return this.state === ConnectionState.CONNECTING
+      return this.state === ConnectionState.CONNECTING;
     },
     isConnected: function () {
-      return this.state === ConnectionState.CONNECTED
+      return this.state === ConnectionState.CONNECTED;
     },
     isDisconnected: function () {
-      return this.state === ConnectionState.DISCONNECTED
-    }
+      return this.state === ConnectionState.DISCONNECTED;
+    },
   },
+
   methods: {
     updateSession: function (field, value) {
-      let props = null
+      let props = null;
 
       if (field === 'nick') {
-        this.nickname = value
+        this.nickname = value;
       } else if (field === 'group') {
-        props = { name: value }
+        props = { name: value };
       } else if (field === 'group_status') {
-        props = { status: value }
+        props = { status: value };
       } else if (field === 'moderator') {
-        props = { moderator: value }
+        props = { moderator: value };
       } else if (field === 'topic') {
-        this.topic = value
+        this.topic = value;
       } else {
-        console.warn('Unexpected session field: ' + field)
+        console.warn('Unexpected session field: ' + field);
       }
 
       if (props) {
-        this.$set(this.channels, 0, Object.assign(this.channels[0], props))
+        this.channels[0] = Object.assign(this.channels[0], props);
       }
     },
     acceptMessage: function (msg) {
-      let bypass = false
+      let bypass = false;
 
       if (msg.type === 'personal' && (msg.sender === this.nickname || msg.from === this.nickname)) {
-        bypass = (msg.to === undefined || msg.to === this.nickname)
+        bypass = msg.to === undefined || msg.to === this.nickname;
       }
 
-      return !bypass
+      return !bypass;
     },
     appendMessageToChannel: function (msg) {
-      let channelName = ''
+      let channelName = '';
 
-      let autoSelect = false
+      let autoSelect = false;
 
       if (msg.type === 'personal') {
-        autoSelect = (msg.sender === this.nickname)
+        autoSelect = msg.sender === this.nickname;
 
-        channelName = msg.to
+        channelName = msg.to;
 
         if (!channelName) {
-          channelName = msg.sender
+          channelName = msg.sender;
         }
 
-        channelName = '@' + channelName
+        channelName = '@' + channelName;
       }
 
-      const channel = this.touchChannel(channelName)
+      const channel = this.touchChannel(channelName);
 
-      channel.messages.push(msg)
+      channel.messages = [...channel.messages, msg];
 
       if (autoSelect) {
-        this.selectChannel(channel)
+        this.selectChannel(channel);
       }
     },
     touchChannel: function (name) {
-      let channel = this.channels[0]
+      let channel = this.channels[0];
 
       if (name.startsWith('@')) {
-        channel = this.channels.find(e => e.name === name)
+        channel = this.channels.find((e) => e.name === name);
       }
 
       if (channel) {
-        channel.highlight = (channel !== this.selectedChannel)
+        channel.highlight = channel !== this.selectedChannel;
       } else {
         channel = {
           name: name,
@@ -247,162 +245,162 @@ export default {
           messages: [],
           users: [this.nickname, name.substring(1)],
           moderator: '',
-          text: ''
-        }
+          text: '',
+        };
 
-        this.channels.push(channel)
+        this.channels = [...this.channels, channel];
       }
 
-      return channel
+      return channel;
     },
     notifyMessage: function (msg) {
       if (msg.type === 'personal') {
-        this.notify(msg.sender, msg.text)
+        this.notify(msg.sender, msg.text);
       } else if (msg.type === 'open') {
-        const regex = new RegExp('\\b' + this.nickname + '\\b')
+        const regex = new RegExp('\\b' + this.nickname + '\\b');
 
         if (regex.test(msg.text)) {
-          this.notify(msg.sender, msg.text)
+          this.notify(msg.sender, msg.text);
         }
       } else if (msg.type === 'wall') {
-        this.notify('WALL', msg.text)
+        this.notify('WALL', msg.text);
       } else if (msg.type === 'status') {
         if (['Notify-On', 'Notify-Off'].includes(msg.category)) {
-          this.notify(msg.category, msg.text)
+          this.notify(msg.category, msg.text);
         }
       }
     },
     notify: function (sender, text) {
-      new Notification( // eslint-disable-line no-new
-        sender || 'Internet CB Network',
-        { icon: '/images/notification.png', body: text })
+      new Notification(sender || 'Internet CB Network', {
+        // eslint-disable-line no-new
+        icon: '/images/notification.png',
+        body: text,
+      });
     },
     incrementUnreadMessages: function (msg) {
       if (['personal', 'open', 'wall', 'status'].includes(msg.type)) {
-        ++this.unread
+        ++this.unread;
       }
     },
     selectChannel: function (channel) {
-      this.selectedChannel = channel
+      this.selectedChannel = channel;
 
-      this.channels.forEach(c => (c.selected = (c === channel)))
+      this.channels.forEach((c) => (c.selected = c === channel));
 
-      channel.highlight = false
+      channel.highlight = false;
     },
     closeChannel: function (channel) {
-      const at = this.channels.indexOf(channel)
+      const at = this.channels.indexOf(channel);
 
-      this.channels.splice(at, 1)
+      this.channels.splice(at, 1);
 
       if (channel.selected) {
-        this.channels[0].selected = true
-        this.selectedChannel = this.channels[0]
+        this.channels[0].selected = true;
+        this.selectedChannel = this.channels[0];
       }
     },
     messageToViewModel: function (msg) {
-      const vm = {}
-      const pZ = n => (n < 10 ? '0' : '') + n
+      const vm = {};
+      const pZ = (n) => (n < 10 ? '0' : '') + n;
 
-      vm.type = msg.type
-      vm.timestamp = pZ(msg.timestamp.getHours()) + ':' +
-        pZ(msg.timestamp.getMinutes()) + ':' +
-        pZ(msg.timestamp.getSeconds())
+      vm.type = msg.type;
+      vm.timestamp =
+        pZ(msg.timestamp.getHours()) + ':' + pZ(msg.timestamp.getMinutes()) + ':' + pZ(msg.timestamp.getSeconds());
 
       if (msg.category) {
-        vm.sender = msg.category
+        vm.sender = msg.category;
       } else if (msg.from) {
-        vm.sender = msg.from
+        vm.sender = msg.from;
       } else if (msg.sender) {
-        vm.sender = msg.sender
+        vm.sender = msg.sender;
       } else {
-        vm.sender = ''
+        vm.sender = '';
       }
 
       if (msg.to) {
-        vm.to = msg.to
+        vm.to = msg.to;
       }
 
-      vm.text = msg.text
+      vm.text = msg.text;
 
-      return vm
+      return vm;
     },
     sendMessage: function (channel) {
       if (channel.text.trim().length > 0) {
         if (channel.text[0] === '/') {
-          this.client.sendCommand(channel.text)
+          this.client.sendCommand(channel.text);
         } else if (channel === this.channels[0]) {
-          this.client.sendOpen(channel.text)
+          this.client.sendOpen(channel.text);
         } else {
-          this.client.sendPersonal(channel.name.substring(1), channel.text)
+          this.client.sendPersonal(channel.name.substring(1), channel.text);
         }
 
-        channel.text = ''
+        channel.text = '';
       }
-    }
+    },
   },
+
   watch: {
     '$store.state.windowState': function (value) {
       if (value === 'visible') {
-        this.unread = 0
+        this.unread = 0;
       }
-    }
-  }
-}
+    },
+  },
+});
 </script>
 
 <style scoped>
 #overlay {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  position:fixed;
-  width:100%;
-  height:100%;
-  background-color:black;
-  opacity:0.3;
-  color:white;
-}
-
-div.centered
-{
-  display:flex;
-  align-items:center;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  position:fixed;
-  width:100%;
-  height:100%;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  opacity: 0.3;
+  color: white;
 }
 
-div.dialog
-{
-  background-color:white;
-  padding:20px;
-  border-radius:5px;
-  width:400px;
-  color:black;
+div.centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+div.dialog {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 400px;
+  color: black;
 }
 
 #page {
-  position:absolute;
-  height:100%;
-  width:100%;
+  position: absolute;
+  height: 100%;
+  width: 100%;
 }
 
 #chat {
-  display:flex;
-  flex-flow:column;
-  height:100%;
+  display: flex;
+  flex-flow: column;
+  height: 100%;
 }
 
 #header {
-  display:flex;
-  flex-shrink:0;
-  align-items:center;
-  overflow:hidden;
-  background-color:#2C3E50;
-  background-image: linear-gradient(to bottom, #2C3E50, #1a252f);
-  color:white;
-  height:45px;
-  padding:3px;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  overflow: hidden;
+  background-color: #2c3e50;
+  background-image: linear-gradient(to bottom, #2c3e50, #1a252f);
+  color: white;
+  height: 45px;
+  padding: 3px;
 }
 </style>

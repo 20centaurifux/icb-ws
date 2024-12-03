@@ -1,21 +1,18 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import { createStore } from 'vuex';
 
-Vue.use(Vuex)
-
-export const Store = new Vuex.Store({
+export const Store = createStore({
   state: {
     windowState: 'visible'
   },
   mutations: {
-    visible (state) {
-      state.windowState = 'visible'
+    visible(state) {
+      state.windowState = 'visible';
     },
-    hidden (state) {
-      state.windowState = 'hidden'
+    hidden(state) {
+      state.windowState = 'hidden';
     }
   },
   getters: {
     windowState: state => state.windowState
   }
-})
+});

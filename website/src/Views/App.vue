@@ -1,42 +1,43 @@
 <template>
-<div id="app">
-  <router-view></router-view>
-</div>
+  <div id="app">
+    <router-view></router-view>
+  </div>
 </template>
 
 <script>
-export default
-{
+import { defineComponent } from 'vue';
+
+export default defineComponent({
   created: function () {
-    const store = this.$store
+    const store = this.$store;
 
     window.addEventListener('focus', function () {
-      store.commit('visible')
-    })
+      store.commit('visible');
+    });
 
     window.addEventListener('blur', function () {
-      store.commit('hidden')
-    })
-  }
-}
+      store.commit('hidden');
+    });
+  },
+});
 </script>
 
 <style>
 body {
-  font-family:'Roboto', sans-serif;
-  font-size:16px;
-  background-color:white;
-  padding:0;
-  margin:0;
-  height:100%;
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  background-color: white;
+  padding: 0;
+  margin: 0;
+  height: 100%;
 }
 
 #app {
-  position:absolute;
-  padding:0;
-  margin:0;
-  height:100%;
-  width:100%;
-  overflow:hidden;
+  position: absolute;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 </style>

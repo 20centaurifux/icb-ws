@@ -3,4 +3,4 @@ export const ConnectionState = Object.freeze({
   DISCONNECTED: 'disconnected',
   CONNECTING: 'connecting',
   CONNECTED: 'connected'
-})
+});

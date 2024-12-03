@@ -3,4 +3,4 @@ export const Config = Object.freeze({
   loginid: 'webuser',
   defaultNick: '',
   defaultGroup: '1'
-})
+});

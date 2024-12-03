@@ -1,8 +1,8 @@
-const path = require('path')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const CopyPlugin = require('copy-webpack-plugin')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin')
-const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const { VueLoaderPlugin } = require('vue-loader');
 
 module.exports = {
   entry: './src/main.js',
@@ -15,11 +15,11 @@ module.exports = {
       },
       {
         test: /\.jpg$/,
-        use: 'file-loader'
+        type: 'asset/resource'
       },
       {
         test: /\.vue$/,
-        use: 'vue-loader'
+        loader: 'vue-loader'
       },
       {
         test: /\.css$/,
@@ -29,6 +29,9 @@ module.exports = {
         ]
       }
     ]
+  },
+  performance: {
+    maxAssetSize: 819200
   },
   output: {
     filename: 'ICBundle.[fullhash].js',
@@ -57,4 +60,4 @@ module.exports = {
       template: './src/index.html'
     })
   ]
-}
+};
