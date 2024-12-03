@@ -132,12 +132,16 @@ export default defineComponent({
           filter((action) => action.action === 'remove'),
           tap((action) => {
             if (action.nick === '*') {
-              channel.users.splice(0, channel.users.length);
+              channel.users = [];
             } else {
               const index = channel.users.indexOf(action.nick);
 
               if (index !== -1) {
-                channel.users.splice(index, 1);
+                const clone = [...channel.users];
+
+                clone.splice(index, 1);
+
+                channel.users = clone;
               }
             }
           })
@@ -292,7 +296,11 @@ export default defineComponent({
     closeChannel: function (channel) {
       const at = this.channels.indexOf(channel);
 
-      this.channels.splice(at, 1);
+      const clone = [...this.channels];
+
+      clone.splice(at, 1);
+
+      this.channels = clone;
 
       if (channel.selected) {
         this.channels[0].selected = true;
