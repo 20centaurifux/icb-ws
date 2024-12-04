@@ -235,7 +235,7 @@ export default defineComponent({
       let channel = this.channels[0];
 
       if (name.startsWith('@')) {
-        channel = this.channels.find((e) => e.name === name);
+        channel = this.channels.find((e) => e.name.toLowerCase() === name.toLowerCase());
       }
 
       if (channel) {
